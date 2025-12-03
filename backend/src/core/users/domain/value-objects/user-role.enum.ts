@@ -1,0 +1,6 @@
+export enum UserRole {
+  COLLABORATOR = 'COLLABORATOR',
+  TEAM_LEADER = 'TEAM_LEADER',
+  SPECIALIST = 'SPECIALIST',
+}
+

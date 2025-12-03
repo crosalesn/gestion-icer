@@ -1,0 +1,5 @@
+export enum TargetRole {
+  COLLABORATOR = 'COLLABORATOR',
+  TEAM_LEADER = 'TEAM_LEADER',
+}
+
