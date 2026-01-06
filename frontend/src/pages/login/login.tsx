@@ -106,7 +106,7 @@ const Login = () => {
         {/* Build date info */}
         <div className="text-center mt-4">
           <p className="text-xs text-gray-300/70">
-            Build: {formatBuildDate(__BUILD_DATE__)}
+            Build Date: {formatBuildDate(__BUILD_DATE__)}
           </p>
         </div>
       </div>
