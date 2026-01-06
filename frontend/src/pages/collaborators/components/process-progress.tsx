@@ -1,7 +1,5 @@
-import { CheckCircle, Circle, Clock } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { clsx } from 'clsx';
-
-type CollaboratorStatus = 'PENDING_DAY_1' | 'PENDING_WEEK_1' | 'PENDING_MONTH_1' | 'FINISHED';
 
 interface ProcessProgressProps {
   status: string;

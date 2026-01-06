@@ -132,7 +132,7 @@ const EvaluationForm = () => {
                         Dimension: {category}
                     </h3>
                     <div className="space-y-8">
-                        {categoryQuestions.map((q, index) => (
+                        {categoryQuestions.map((q) => (
                             <div key={q.id} className="pb-2">
                                 <p className="text-base font-medium text-gray-900 mb-4">
                                     {q.text}

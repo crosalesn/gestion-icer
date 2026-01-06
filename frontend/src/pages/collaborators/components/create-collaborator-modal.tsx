@@ -81,7 +81,7 @@ const CreateCollaboratorModal = ({ isOpen, onClose, onSuccess }: CreateCollabora
         toast.success(`Colaborador ${formData.name} creado y evaluación Día 1 asignada`);
       } catch (evalError) {
         console.error('Error assigning Day 1 evaluation:', evalError);
-        toast.warning(`Colaborador creado, pero hubo un error al asignar la evaluación inicial`);
+        toast.error(`Colaborador creado, pero hubo un error al asignar la evaluación inicial`);
       }
       
       onSuccess();

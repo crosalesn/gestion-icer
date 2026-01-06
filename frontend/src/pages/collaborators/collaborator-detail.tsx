@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { format, parseISO, differenceInDays } from 'date-fns';
-import { es } from 'date-fns/locale';
 import reportsService from '../../features/reports/services/reports-service';
 import evaluationsService from '../../features/evaluations/services/evaluations-service';
 import type { CollaboratorHistory, Evaluation } from '../../features/reports/types/report.types';

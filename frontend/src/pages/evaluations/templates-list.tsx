@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Eye, ToggleLeft, ToggleRight, FileText, Info } from 'lucide-react';
+import { Plus, Edit, ToggleLeft, ToggleRight, FileText, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import Button from '../../shared/components/ui/button';
 import templateService from '../../features/evaluations/services/template-service';

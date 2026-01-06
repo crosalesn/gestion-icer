@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import reportsService from '../../features/reports/services/reports-service';
 import type { DashboardStats } from '../../features/reports/types/report.types';
 import { Users, AlertTriangle, CheckCircle } from 'lucide-react';
-import { clsx } from 'clsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();

@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO, differenceInDays } from 'date-fns';
-import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import collaboratorsService from '../../features/collaborators/services/collaborators-service';
 import type { Collaborator } from '../../features/collaborators/types/collaborator.types';

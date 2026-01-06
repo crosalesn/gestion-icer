@@ -9,7 +9,6 @@ import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import templateService from '../../features/evaluations/services/template-service';
 import dimensionsService from '../../features/evaluations/services/dimensions-service';
-import type { EvaluationTemplate } from '../../features/evaluations/types/template.types';
 import type { Dimension } from '../../features/evaluations/types/dimension.types';
 import { EvaluationMilestone, TargetRole, QuestionType } from '../../features/evaluations/types/template.types';
 
@@ -39,7 +38,7 @@ const TemplateEditor = () => {
   const [saving, setSaving] = useState(false);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
 
-  const { register, control, handleSubmit, reset, setValue, watch } = useForm<TemplateFormData>({
+  const { register, control, handleSubmit, reset } = useForm<TemplateFormData>({
     defaultValues: {
       title: '',
       description: '',
@@ -55,8 +54,6 @@ const TemplateEditor = () => {
     name: 'questions'
   });
 
-  // Watch questions to update order
-  const questions = watch('questions');
 
   // Load dimensions from backend
   useEffect(() => {
@@ -157,86 +154,6 @@ const TemplateEditor = () => {
   };
 
   if (loading) return <div className="p-8 text-center">Cargando editor...</div>;
-
-  // Fix for Implicit any types in render
-  const renderDraggable = (provided: any, snapshot: any, index: number, field: any) => (
-    <div
-      ref={provided.innerRef}
-      {...provided.draggableProps}
-      className={clsx(
-        "border rounded-lg p-4 bg-white transition-shadow",
-        snapshot.isDragging ? "shadow-lg ring-2 ring-brand-primary/20" : "border-gray-200 hover:border-brand-primary/50"
-      )}
-    >
-      <div className="flex gap-3">
-        <div {...provided.dragHandleProps} className="mt-2 text-gray-400 hover:text-gray-600 cursor-move">
-          <GripVertical size={20} />
-        </div>
-        
-        <div className="flex-1 space-y-3">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Input
-                {...register(`questions.${index}.text` as const, { required: true })}
-                placeholder="Escribe la pregunta..."
-                className="font-medium"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => remove(index)}
-              className="text-gray-400 hover:text-red-500 p-2 transition-colors"
-              title="Eliminar pregunta"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">Dimensión</label>
-              <select
-                {...register(`questions.${index}.dimensionId` as const, { required: true })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
-              >
-                {dimensions.length === 0 ? (
-                  <option value="">Cargando dimensiones...</option>
-                ) : (
-                  dimensions.map((dim) => (
-                    <option key={dim.id} value={dim.id}>
-                      {dim.name}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">Tipo de Respuesta</label>
-              <select
-                {...register(`questions.${index}.type` as const)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
-              >
-                <option value={QuestionType.SCALE_1_4}>Escala 1 a 4</option>
-                <option value={QuestionType.OPEN_TEXT}>Texto Abierto</option>
-              </select>
-            </div>
-
-            <div className="flex items-center pt-6">
-              <label className="flex items-center text-sm text-gray-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register(`questions.${index}.required` as const)}
-                  className="mr-2 h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
-                />
-                Obligatoria
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-5xl mx-auto pb-10">

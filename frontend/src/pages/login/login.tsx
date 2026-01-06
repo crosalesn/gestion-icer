@@ -7,8 +7,6 @@ import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import loginBackground from '../../assets/witi-background.svg';
 
-// Global variable injected by Vite at build time
-declare const __BUILD_DATE__: string;
 
 const formatBuildDate = (isoDate: string) => {
   const date = new Date(isoDate);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { CompletedAssignmentResponse } from '../../features/evaluations/types/template.types';
 import { EvaluationMilestone, QuestionType } from '../../features/evaluations/types/template.types';
-import { ChevronDown, ChevronUp, Calendar, CheckCircle2, FileText } from 'lucide-react';
+import { ChevronDown, ChevronUp, Calendar, FileText } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface CompletedEvaluationsProps {
@@ -49,10 +49,6 @@ const CompletedEvaluations = ({ evaluations, loading }: CompletedEvaluationsProp
     return 'text-green-600';
   };
 
-  const getAnswerValue = (questionId: string, answers: Array<{ questionId: string; value: number | string }>): number | string | null => {
-    const answer = answers.find((a) => a.questionId === questionId);
-    return answer ? answer.value : null;
-  };
 
   const getRatingLabel = (value: number): string => {
     const labels: Record<number, string> = {

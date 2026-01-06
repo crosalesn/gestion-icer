@@ -5,7 +5,7 @@ import { ActionPlanType } from '../../features/action-plans/types/action-plan.ty
 import type { AssignActionPlanPayload } from '../../features/action-plans/types/action-plan.types';
 import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
-import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 
 const AssignPlan = () => {
   const { collaboratorId } = useParams<{ collaboratorId: string }>();

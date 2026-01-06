@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type { Question, EvaluationTemplate, EvaluationAnswer } from '../../features/evaluations/types/template.types';
 import { QuestionType } from '../../features/evaluations/types/template.types';
 import Button from './ui/button';
-import Input from './ui/input';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
 interface DynamicEvaluationFormProps {

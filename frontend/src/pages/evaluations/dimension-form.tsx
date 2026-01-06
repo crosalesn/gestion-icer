@@ -5,7 +5,7 @@ import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import dimensionsService from '../../features/evaluations/services/dimensions-service';
-import type { Dimension, CreateDimensionPayload, UpdateDimensionPayload } from '../../features/evaluations/types/dimension.types';
+import type { CreateDimensionPayload, UpdateDimensionPayload } from '../../features/evaluations/types/dimension.types';
 
 const DimensionForm = () => {
   const navigate = useNavigate();
@@ -212,7 +212,7 @@ const DimensionForm = () => {
               name="description"
               rows={4}
               placeholder="Mide el nivel de integración del colaborador con el equipo y la organización"
-              value={formData.description}
+              value={formData.description || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />

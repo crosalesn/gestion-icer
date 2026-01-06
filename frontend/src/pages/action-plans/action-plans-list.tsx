@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, Calendar, User, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Target, Calendar, User, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { clsx } from 'clsx';
 import actionPlansService from '../../features/action-plans/services/action-plans-service';
 import collaboratorsService from '../../features/collaborators/services/collaborators-service';
 import type { ActionPlan } from '../../features/action-plans/types/action-plan.types';

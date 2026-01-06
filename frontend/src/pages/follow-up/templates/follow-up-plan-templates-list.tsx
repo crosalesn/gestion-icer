@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, FileText, Info, Calendar, Clock, AlertTriangle, Edit, Trash2 } from 'lucide-react';
+import { Plus, FileText, Calendar, Clock, Edit, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { clsx } from 'clsx';
 import Button from '../../../shared/components/ui/button';

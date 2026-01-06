@@ -24,6 +24,7 @@ const normalizeCollaborator = (data: any): Collaborator => {
     project: data.project || data._project || '',
     admissionDate: data.admissionDate || data._admissionDate || '',
     teamLeader: data.teamLeader || data._teamLeader || '',
+    clientId: data.clientId || data._clientId || data.client_id || data._client_id || '',
     status: data.status || data._status || '',
     riskLevel: (riskLevel || 'NONE').toUpperCase() as 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE',
     createdAt: data.createdAt || data._createdAt || '',

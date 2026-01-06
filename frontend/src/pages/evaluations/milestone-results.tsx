@@ -162,7 +162,7 @@ const MilestoneResults = ({ results, loading }: MilestoneResultsProps) => {
         {/* Timeline of results */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-700">Detalle por Hito</h4>
-          {sortedResults.map((result, index) => {
+          {sortedResults.map((result) => {
             const colors = getRiskLevelColor(result.riskLevel);
             const Icon = colors.icon;
             
