@@ -109,27 +109,28 @@ const CompletedEvaluations = ({ evaluations, loading }: CompletedEvaluationsProp
     );
   }
 
-  // Group questions by dimension
+  // Group questions by dimensionId
   const groupQuestionsByDimension = (questions: any[]) => {
     const grouped: Record<string, any[]> = {};
     questions.forEach((q) => {
-      const dim = q.dimension || 'General';
-      if (!grouped[dim]) {
-        grouped[dim] = [];
+      // Use dimensionId as key, with dimension name as fallback for display
+      const dimKey = q.dimensionId || q.dimension?.id || 'General';
+      if (!grouped[dimKey]) {
+        grouped[dimKey] = [];
       }
-      grouped[dim].push(q);
+      grouped[dimKey].push(q);
     });
     return grouped;
   };
 
-  const getDimensionLabel = (dimension: string): string => {
-    const labels: Record<string, string> = {
-      INTEGRATION: 'Integración',
-      COMMUNICATION: 'Comunicación',
-      ROLE_UNDERSTANDING: 'Comprensión del Rol',
-      PERFORMANCE: 'Desempeño',
-    };
-    return labels[dimension] || dimension;
+  const getDimensionLabel = (dimensionId: string, questions: any[]): string => {
+    // Try to get dimension name from the first question in the group
+    const firstQuestion = questions[0];
+    if (firstQuestion?.dimension?.name) {
+      return firstQuestion.dimension.name;
+    }
+    // Fallback to dimensionId if no name available
+    return dimensionId || 'General';
   };
 
   return (
@@ -209,10 +210,10 @@ const CompletedEvaluations = ({ evaluations, loading }: CompletedEvaluationsProp
               {isExpanded && (
                 <div className="border-t-2 border-gray-100 bg-gray-50/50 p-6">
                   <div className="space-y-6">
-                    {Object.entries(questionsByDimension).map(([dimension, questions]) => (
-                      <div key={dimension} className="space-y-4">
+                    {Object.entries(questionsByDimension).map(([dimensionId, questions]) => (
+                      <div key={dimensionId} className="space-y-4">
                         <h5 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b border-gray-200 pb-2">
-                          {getDimensionLabel(dimension)}
+                          {getDimensionLabel(dimensionId, questions)}
                         </h5>
                         <div className="space-y-4 pl-2">
                           {questions

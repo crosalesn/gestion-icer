@@ -30,7 +30,13 @@ export enum EvaluationStatus {
 export interface Question {
   id: string;
   text: string;
-  dimension: QuestionDimension;
+  dimensionId: string;
+  dimension?: {
+    id: string;
+    code: string;
+    name: string;
+    description: string | null;
+  };
   type: QuestionType;
   order: number;
   required: boolean;

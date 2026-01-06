@@ -1,4 +1,5 @@
-import { Controller, Post, Body, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { FindAllUsersUseCase } from '../../application/use-cases/find-all-users.use-case';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -6,6 +7,7 @@ import { CreateUserCommand } from '../../application/commands/create-user.comman
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(
@@ -14,6 +16,7 @@ export class UserController {
   ) {}
 
   @Get()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async findAll() {
     const users = await this.findAllUsersUseCase.execute();

@@ -26,6 +26,10 @@ export class UpdateCollaboratorDto {
   @IsNotEmpty()
   teamLeader: string;
 
+  @IsString()
+  @IsNotEmpty()
+  clientId: string;
+
   toCommand(id: string): UpdateCollaboratorCommand {
     return new UpdateCollaboratorCommand(
       id,
@@ -35,6 +39,7 @@ export class UpdateCollaboratorDto {
       this.project,
       this.role,
       this.teamLeader,
+      this.clientId,
     );
   }
 }

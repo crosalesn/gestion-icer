@@ -6,6 +6,7 @@ export interface Collaborator {
   project: string;
   admissionDate: string;
   teamLeader: string;
+  clientId: string;
   status: string;
   riskLevel: 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
   createdAt: string;
@@ -19,6 +20,7 @@ export interface CreateCollaboratorPayload {
   project: string;
   admissionDate: string;
   teamLeader: string;
+  clientId: string;
 }
 
 export interface UpdateCollaboratorPayload {
@@ -28,4 +30,5 @@ export interface UpdateCollaboratorPayload {
   project: string;
   admissionDate: string;
   teamLeader: string;
+  clientId: string;
 }

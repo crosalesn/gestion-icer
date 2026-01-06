@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Eye, Copy, ToggleLeft, ToggleRight, FileText, Info } from 'lucide-react';
+import { Plus, Edit, Eye, ToggleLeft, ToggleRight, FileText, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import Button from '../../shared/components/ui/button';
 import templateService from '../../features/evaluations/services/template-service';
@@ -77,10 +77,6 @@ const TemplatesList = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => templateService.seed().then(() => { toast.success('Plantillas base creadas'); fetchTemplates(); })}>
-            <Copy size={18} className="mr-2" />
-            Restaurar Base
-          </Button>
           <Button onClick={() => navigate('/evaluaciones/plantillas/nueva')}>
             <Plus size={20} className="mr-2" />
             Nueva Plantilla

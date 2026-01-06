@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -10,38 +10,41 @@ import { EvaluationStatus } from '../../domain/value-objects/evaluation-status.e
 
 @Entity('evaluation_assignments')
 export class EvaluationAssignmentOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'collaborator_id', type: 'uuid' })
-  collaboratorId: string;
+  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
+  uuid: string;
 
-  @Column({ name: 'evaluator_user_id', type: 'uuid', nullable: true })
-  evaluatorUserId: string | null;
+  @Column({ name: 'collaborator_id', type: 'int' })
+  collaboratorId: number;
 
-  @Column({ name: 'template_id', type: 'uuid' })
-  templateId: string;
+  @Column({ name: 'evaluator_user_id', type: 'int', nullable: true })
+  evaluatorUserId: number | null;
+
+  @Column({ name: 'template_id', type: 'int' })
+  templateId: number;
 
   @Column({
-    type: 'enum',
-    enum: EvaluationMilestone,
+    type: 'varchar',
+    length: 50,
   })
   milestone: EvaluationMilestone;
 
   @Column({
-    type: 'enum',
-    enum: EvaluationStatus,
+    type: 'varchar',
+    length: 50,
     default: EvaluationStatus.PENDING,
   })
   status: EvaluationStatus;
 
-  @Column({ name: 'due_date', type: 'timestamp' })
+  @Column({ name: 'due_date', type: 'datetime2' })
   dueDate: Date;
 
-  @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'completed_at', type: 'datetime2', nullable: true })
   completedAt: Date | null;
 
-  @Column('jsonb', { default: [] })
+  @Column('nvarchar', { length: 'MAX', default: '[]' })
   answers: Array<{ questionId: string; value: number | string }>;
 
   @Column('float', { nullable: true })

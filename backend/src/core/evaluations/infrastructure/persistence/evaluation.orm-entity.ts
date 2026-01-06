@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -10,26 +10,29 @@ import { EvaluationStatus } from '../../domain/value-objects/evaluation-status.e
 
 @Entity('evaluations')
 export class EvaluationOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'collaborator_id' })
-  collaboratorId: string;
+  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
+  uuid: string;
+
+  @Column({ name: 'collaborator_id', type: 'int' })
+  collaboratorId: number;
 
   @Column({
-    type: 'enum',
-    enum: EvaluationType,
+    type: 'varchar',
+    length: 50,
   })
   type: EvaluationType;
 
   @Column({
-    type: 'enum',
-    enum: EvaluationStatus,
+    type: 'varchar',
+    length: 50,
     default: EvaluationStatus.PENDING,
   })
   status: EvaluationStatus;
 
-  @Column('jsonb', { default: {} })
+  @Column('nvarchar', { length: 'MAX', default: '{}' })
   answers: Record<string, number | string>;
 
   @Column('float', { nullable: true })
@@ -41,7 +44,7 @@ export class EvaluationOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'completed_at', type: 'datetime2', nullable: true })
   completedAt: Date | null;
 }
 

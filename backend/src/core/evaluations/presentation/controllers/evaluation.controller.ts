@@ -5,7 +5,6 @@ import {
   Param,
   Post,
   Put,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CreateEvaluationUseCase } from '../../application/use-cases/create-evaluation.use-case';
@@ -17,8 +16,6 @@ import { SubmitEvaluationCommand } from '../../application/commands/submit-evalu
 import { Evaluation } from '../../domain/entities/evaluation.entity';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { EvaluationType } from '../../domain/value-objects/evaluation-type.enum';
-import { GetUser } from '../../../../common/decorators/get-user.decorator';
-import type { AuthenticatedUser } from '../../../../common/decorators/get-user.decorator';
 import { AssignEvaluationUseCase } from '../../application/use-cases/assign-evaluation.use-case';
 import { GetPendingEvaluationsUseCase } from '../../application/use-cases/get-pending-evaluations.use-case';
 import { SubmitAssignmentAnswersUseCase } from '../../application/use-cases/submit-assignment-answers.use-case';
@@ -36,9 +33,10 @@ import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
 import { TemplateResponseDto } from '../dto/template-response.dto';
 import { MilestoneResultResponseDto } from '../dto/milestone-result-response.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Evaluations')
+@ApiBearerAuth()
 @Controller('evaluations')
 @UseGuards(JwtAuthGuard)
 export class EvaluationController {

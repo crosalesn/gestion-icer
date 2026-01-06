@@ -22,7 +22,9 @@ export class PostgresMilestoneResultRepository
   }
 
   async findById(id: string): Promise<MilestoneResult | null> {
-    const ormEntity = await this.repository.findOne({ where: { id } });
+    const ormEntity = await this.repository.findOne({
+      where: { id: Number(id) },
+    });
     return ormEntity ? MilestoneResultMapper.toDomain(ormEntity) : null;
   }
 
@@ -30,7 +32,7 @@ export class PostgresMilestoneResultRepository
     collaboratorId: string,
   ): Promise<MilestoneResult[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId },
+      where: { collaboratorId: Number(collaboratorId) },
       order: { calculatedAt: 'ASC' },
     });
     return ormEntities.map((orm) => MilestoneResultMapper.toDomain(orm));
@@ -41,7 +43,7 @@ export class PostgresMilestoneResultRepository
     milestone: EvaluationMilestone,
   ): Promise<MilestoneResult | null> {
     const ormEntity = await this.repository.findOne({
-      where: { collaboratorId, milestone },
+      where: { collaboratorId: Number(collaboratorId), milestone },
     });
     return ormEntity ? MilestoneResultMapper.toDomain(ormEntity) : null;
   }

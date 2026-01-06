@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Question, EvaluationTemplate, EvaluationAnswer } from '../../features/evaluations/types/template.types';
-import { QuestionType, QuestionDimension } from '../../features/evaluations/types/template.types';
+import { QuestionType } from '../../features/evaluations/types/template.types';
 import Button from './ui/button';
 import Input from './ui/input';
 import { CheckCircle, AlertCircle } from 'lucide-react';
@@ -94,14 +94,9 @@ const DynamicEvaluationForm = ({
     await onSubmit(answerArray);
   };
 
-  const getDimensionLabel = (dimension: QuestionDimension): string => {
-    const labels: Record<QuestionDimension, string> = {
-      [QuestionDimension.INTEGRATION]: 'Integración',
-      [QuestionDimension.COMMUNICATION]: 'Comunicación',
-      [QuestionDimension.ROLE_UNDERSTANDING]: 'Entendimiento del Rol',
-      [QuestionDimension.PERFORMANCE]: 'Rendimiento',
-    };
-    return labels[dimension] || dimension;
+  const getDimensionLabel = (question: Question): string => {
+    // Use dimension name from the question object if available, otherwise use dimensionId as fallback
+    return question.dimension?.name || question.dimensionId || 'Sin dimensión';
   };
 
   const ratingLabels = [
@@ -111,23 +106,25 @@ const DynamicEvaluationForm = ({
     { value: 4, label: 'Sobresaliente', colorClass: 'text-emerald-600 border-emerald-200 bg-emerald-50' },
   ];
 
-  // Group questions by dimension
+  // Group questions by dimensionId
   const questionsByDimension = template.questions.reduce((acc, q) => {
-    if (!acc[q.dimension]) {
-      acc[q.dimension] = [];
+    const dimId = q.dimensionId;
+    if (!acc[dimId]) {
+      acc[dimId] = [];
     }
-    acc[q.dimension].push(q);
+    acc[dimId].push(q);
     return acc;
-  }, {} as Record<QuestionDimension, Question[]>);
+  }, {} as Record<string, Question[]>);
 
   // Sort questions within each dimension by order
-  Object.keys(questionsByDimension).forEach((dimension) => {
-    questionsByDimension[dimension as QuestionDimension].sort((a, b) => a.order - b.order);
+  Object.keys(questionsByDimension).forEach((dimensionId) => {
+    questionsByDimension[dimensionId].sort((a, b) => a.order - b.order);
   });
 
+  // Sort dimensions by the order of their first question
   const sortedDimensions = Object.keys(questionsByDimension).sort((a, b) => {
-    const firstQuestionA = questionsByDimension[a as QuestionDimension][0];
-    const firstQuestionB = questionsByDimension[b as QuestionDimension][0];
+    const firstQuestionA = questionsByDimension[a][0];
+    const firstQuestionB = questionsByDimension[b][0];
     return firstQuestionA.order - firstQuestionB.order;
   });
 
@@ -146,12 +143,13 @@ const DynamicEvaluationForm = ({
         </div>
       )}
 
-      {sortedDimensions.map((dimension) => {
-        const dimensionQuestions = questionsByDimension[dimension as QuestionDimension];
+      {sortedDimensions.map((dimensionId) => {
+        const dimensionQuestions = questionsByDimension[dimensionId];
+        const firstQuestion = dimensionQuestions[0];
         return (
-          <div key={dimension} className="space-y-6">
+          <div key={dimensionId} className="space-y-6">
             <h3 className="text-lg font-bold text-gray-800 pb-2 border-b border-gray-200">
-              Dimensión: {getDimensionLabel(dimension as QuestionDimension)}
+              Dimensión: {getDimensionLabel(firstQuestion)}
             </h3>
             <div className="space-y-8">
               {dimensionQuestions.map((question) => (

@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -10,27 +10,30 @@ import { ActionPlanStatus } from '../../domain/value-objects/action-plan-status.
 
 @Entity('action_plans')
 export class ActionPlanOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'collaborator_id' })
-  collaboratorId: string;
+  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
+  uuid: string;
+
+  @Column({ name: 'collaborator_id', type: 'int' })
+  collaboratorId: number;
 
   @Column({
-    type: 'enum',
-    enum: ActionPlanType,
+    type: 'varchar',
+    length: 50,
   })
   type: ActionPlanType;
 
-  @Column('text')
+  @Column({ type: 'nvarchar', length: 'MAX' })
   description: string;
 
-  @Column('simple-array')
+  @Column({ type: 'nvarchar', length: 'MAX' })
   goals: string[];
 
   @Column({
-    type: 'enum',
-    enum: ActionPlanStatus,
+    type: 'varchar',
+    length: 50,
     default: ActionPlanStatus.ACTIVE,
   })
   status: ActionPlanStatus;

@@ -33,57 +33,83 @@ export class AssignEvaluationUseCase {
       throw new Error('Collaborator not found');
     }
 
-    // Check if assignment already exists for this milestone
+    // Get the internal numeric ID for FK relations
+    const collaboratorInternalId = collaborator.internalId;
+    if (!collaboratorInternalId) {
+      throw new Error('Collaborator internal ID not available');
+    }
+
+    // Determine required roles based on milestone
+    const requiredRoles = this.getRequiredRolesForMilestone(command.milestone);
+
+    // Fetch existing assignments using internal ID (numeric)
     const existingAssignments = await this.assignmentRepository.findByCollaboratorAndMilestone(
-      command.collaboratorId,
+      collaboratorInternalId,
       command.milestone,
     );
 
-    if (existingAssignments.length > 0) {
-      this.logger.warn(
-        `Evaluation for milestone ${command.milestone} already assigned to collaborator ${command.collaboratorId}`,
+    const newAssignments: EvaluationAssignment[] = [];
+    const allAssignments = [...existingAssignments];
+
+    for (const role of requiredRoles) {
+      // Find active template for this milestone and role
+      const template = await this.templateRepository.findActiveByMilestoneAndRole(
+        command.milestone,
+        role,
       );
-      return existingAssignments;
+
+      if (!template) {
+        this.logger.error(
+          `No active template found for milestone ${command.milestone} and role ${role}. This role will be skipped, which may cause incomplete evaluation cycles.`,
+        );
+        continue;
+      }
+
+      // Check if assignment already exists for this template
+      const alreadyAssigned = existingAssignments.some(
+        (a) => a.templateId === template.id,
+      );
+
+      if (alreadyAssigned) {
+        this.logger.debug(
+          `Evaluation for milestone ${command.milestone} and role ${role} already assigned`,
+        );
+        continue;
+      }
+
+      // Create new assignment
+      const dueDate = this.calculateDueDate(command.milestone, collaborator.admissionDate);
+
+      const assignment = EvaluationAssignment.create(
+        uuidv4(),
+        collaboratorInternalId,
+        template.id,
+        command.milestone,
+        dueDate,
+        null, // No specific evaluator - any user can complete this (or role based)
+      );
+
+      await this.assignmentRepository.save(assignment);
+      newAssignments.push(assignment);
+      allAssignments.push(assignment);
     }
 
-    const assignments: EvaluationAssignment[] = [];
-
-    // SIMPLIFIED SYSTEM: Always create only ONE evaluation per milestone
-    // Try to get COLLABORATOR template first, fallback to any template for this milestone
-    let template = await this.templateRepository.findActiveByMilestoneAndRole(
-      command.milestone,
-      TargetRole.COLLABORATOR,
+    this.logger.log(
+      `Created ${newAssignments.length} new assignment(s) for milestone ${command.milestone}. Total: ${allAssignments.length}`,
     );
+    return allAssignments;
+  }
 
-    // If no COLLABORATOR template, try to get any active template for this milestone
-    if (!template) {
-      const allTemplates = await this.templateRepository.findAll();
-      template = allTemplates.find(
-        (t) => t.milestone === command.milestone && t.isActive,
-      ) || null;
+  private getRequiredRolesForMilestone(milestone: EvaluationMilestone): TargetRole[] {
+    switch (milestone) {
+      case EvaluationMilestone.DAY_1:
+        return [TargetRole.COLLABORATOR];
+      case EvaluationMilestone.WEEK_1:
+      case EvaluationMilestone.MONTH_1:
+        return [TargetRole.COLLABORATOR, TargetRole.TEAM_LEADER];
+      default:
+        return [];
     }
-
-    if (!template) {
-      throw new Error(`No active template found for milestone ${command.milestone}`);
-    }
-
-    // SIMPLIFIED SYSTEM: No evaluator assignment - any user can complete any evaluation
-    const dueDate = this.calculateDueDate(command.milestone, collaborator.admissionDate);
-
-    const assignment = EvaluationAssignment.create(
-      uuidv4(),
-      collaborator.id,
-      template.id,
-      command.milestone,
-      dueDate,
-      null, // No specific evaluator - any user can complete this
-    );
-
-    await this.assignmentRepository.save(assignment);
-    assignments.push(assignment);
-
-    this.logger.log(`Created ${assignments.length} assignment(s) for milestone ${command.milestone}`);
-    return assignments;
   }
 
   private calculateDueDate(milestone: EvaluationMilestone, admissionDate: Date): Date {

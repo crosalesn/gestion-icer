@@ -1,6 +1,7 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import type { IEvaluationAssignmentRepository } from '../../domain/repositories/evaluation-assignment.repository.interface';
 import type { IEvaluationTemplateRepository } from '../../domain/repositories/evaluation-template.repository.interface';
+import type { ICollaboratorRepository } from '../../../collaborators/domain/repositories/collaborator.repository.interface';
 import { EvaluationStatus } from '../../domain/value-objects/evaluation-status.enum';
 
 export interface CompletedAssignmentResponse {
@@ -20,7 +21,13 @@ export interface CompletedAssignmentResponse {
     questions: Array<{
       id: string;
       text: string;
-      dimension: string;
+      dimensionId: string;
+      dimension?: {
+        id: string;
+        code: string;
+        name: string;
+        description: string | null;
+      };
       type: string;
       order: number;
     }>;
@@ -36,13 +43,24 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
     private readonly assignmentRepository: IEvaluationAssignmentRepository,
     @Inject('IEvaluationTemplateRepository')
     private readonly templateRepository: IEvaluationTemplateRepository,
+    @Inject('ICollaboratorRepository')
+    private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
   async execute(collaboratorId: string): Promise<CompletedAssignmentResponse[]> {
     this.logger.log(`Getting completed assignments for collaborator ${collaboratorId}`);
 
-    // Get all assignments for this collaborator
-    const allAssignments = await this.assignmentRepository.findByCollaboratorId(collaboratorId);
+    // collaboratorId is UUID - need to get internal ID for FK lookups
+    const collaborator = await this.collaboratorRepository.findById(collaboratorId);
+    if (!collaborator) {
+      throw new NotFoundException('Collaborator not found');
+    }
+    if (!collaborator.internalId) {
+      throw new Error('Collaborator internal ID not available');
+    }
+
+    // Get all assignments for this collaborator using internal ID
+    const allAssignments = await this.assignmentRepository.findByCollaboratorId(collaborator.internalId);
 
     // Filter only completed assignments
     const completedAssignments = allAssignments.filter(
@@ -72,7 +90,13 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
             questions: template.questions.map((q) => ({
               id: q.id,
               text: q.text,
-              dimension: q.dimension,
+              dimensionId: q.dimensionId,
+              dimension: q.dimension ? {
+                id: q.dimension.id,
+                code: q.dimension.code,
+                name: q.dimension.name,
+                description: q.dimension.description,
+              } : undefined,
               type: q.type,
               order: q.order,
             })),
@@ -92,4 +116,3 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
     return results;
   }
 }
-

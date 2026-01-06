@@ -1,17 +1,23 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { CollaboratorStatus } from '../../domain/value-objects/collaborator-status.enum';
 import { RiskLevel } from '../../domain/value-objects/risk-level.enum';
+import { ClientOrmEntity } from '../../../clients/infrastructure/persistence/client.orm-entity';
 
 @Entity('collaborators')
 export class CollaboratorOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
+  uuid: string;
 
   @Column()
   name: string;
@@ -31,16 +37,23 @@ export class CollaboratorOrmEntity {
   @Column({ name: 'team_leader' })
   teamLeader: string;
 
+  @Column({ name: 'client_id', type: 'int', nullable: false })
+  clientId: number;
+
+  @ManyToOne(() => ClientOrmEntity)
+  @JoinColumn({ name: 'client_id' })
+  client: ClientOrmEntity;
+
   @Column({
-    type: 'enum',
-    enum: CollaboratorStatus,
+    type: 'varchar',
+    length: 50,
     default: CollaboratorStatus.PENDING_DAY_1,
   })
   status: CollaboratorStatus;
 
   @Column({
-    type: 'enum',
-    enum: RiskLevel,
+    type: 'varchar',
+    length: 50,
     default: RiskLevel.NONE,
     name: 'risk_level',
   })

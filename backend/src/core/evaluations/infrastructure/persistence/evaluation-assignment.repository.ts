@@ -23,7 +23,7 @@ export class PostgresEvaluationAssignmentRepository
   }
 
   async findById(id: string): Promise<EvaluationAssignment | null> {
-    const ormEntity = await this.repository.findOne({ where: { id } });
+    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
     return ormEntity ? EvaluationAssignmentMapper.toDomain(ormEntity) : null;
   }
 
@@ -31,7 +31,7 @@ export class PostgresEvaluationAssignmentRepository
     collaboratorId: string,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId },
+      where: { collaboratorId: Number(collaboratorId) },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationAssignmentMapper.toDomain(orm));
@@ -41,7 +41,7 @@ export class PostgresEvaluationAssignmentRepository
     evaluatorUserId: string,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
-      where: { evaluatorUserId },
+      where: { evaluatorUserId: Number(evaluatorUserId) },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationAssignmentMapper.toDomain(orm));
@@ -52,7 +52,7 @@ export class PostgresEvaluationAssignmentRepository
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
       where: {
-        evaluatorUserId,
+        evaluatorUserId: Number(evaluatorUserId),
         status: EvaluationStatus.PENDING,
       },
       order: { dueDate: 'ASC' },
@@ -75,7 +75,7 @@ export class PostgresEvaluationAssignmentRepository
     milestone: EvaluationMilestone,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId, milestone },
+      where: { collaboratorId: Number(collaboratorId), milestone },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationAssignmentMapper.toDomain(orm));

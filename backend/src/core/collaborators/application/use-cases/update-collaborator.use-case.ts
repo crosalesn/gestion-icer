@@ -31,12 +31,14 @@ export class UpdateCollaboratorUseCase {
     // Reconstitute with updated values
     const updatedCollaborator = Collaborator.reconstitute(
       collaborator.id,
+      collaborator.internalId!, // Keep the same internal ID
       command.name,
       command.email,
       command.admissionDate,
       command.project,
       command.role,
       command.teamLeader,
+      command.clientId,
       collaborator.status,
       collaborator.riskLevel,
       collaborator.createdAt,

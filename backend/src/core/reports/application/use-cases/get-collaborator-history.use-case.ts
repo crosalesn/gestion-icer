@@ -45,6 +45,7 @@ export class GetCollaboratorHistoryUseCase {
   ) {}
 
   async execute(collaboratorId: string): Promise<CollaboratorHistoryReport> {
+    // collaboratorId is the UUID (public identifier)
     const collaborator = await this.collaboratorRepository.findById(
       collaboratorId,
     );
@@ -53,12 +54,18 @@ export class GetCollaboratorHistoryUseCase {
       throw new NotFoundException('Collaborator not found');
     }
 
+    // Use internal ID (numeric) for repository queries with FK relationships
+    const internalId = collaborator.internalId;
+    if (!internalId) {
+      throw new Error('Collaborator internal ID not available');
+    }
+
     const evaluations = await this.evaluationRepository.findByCollaboratorId(
-      collaboratorId,
+      internalId,
     );
 
     const assignments = await this.assignmentRepository.findByCollaboratorId(
-      collaboratorId,
+      internalId,
     );
 
     const mappedAssignments = assignments.map((a) => ({
@@ -81,7 +88,7 @@ export class GetCollaboratorHistoryUseCase {
     ];
 
     const activePlan = await this.actionPlanRepository.findActiveByCollaboratorId(
-      collaboratorId,
+      internalId,
     );
 
     return {

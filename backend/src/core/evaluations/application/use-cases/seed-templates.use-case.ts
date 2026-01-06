@@ -1,25 +1,44 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import type { IEvaluationTemplateRepository } from '../../domain/repositories/evaluation-template.repository.interface';
+import type { IDimensionRepository } from '../../domain/repositories/dimension.repository.interface';
 import { EvaluationTemplate } from '../../domain/entities/evaluation-template.entity';
-import { Question } from '../../domain/entities/question.entity';
+import { Dimension } from '../../domain/entities/dimension.entity';
 import { EvaluationMilestone } from '../../domain/value-objects/evaluation-milestone.enum';
 import { TargetRole } from '../../domain/value-objects/target-role.enum';
-import { QuestionDimension } from '../../domain/value-objects/question-dimension.enum';
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
 import { CreateTemplateUseCase } from './create-template.use-case';
+import { SeedDimensionsUseCase } from './seed-dimensions.use-case';
+
+// Mapa de códigos de dimensión para referencia
+const DIM_CODE = {
+  INTEGRATION: 'INTEGRATION',
+  COMMUNICATION: 'COMMUNICATION',
+  ROLE_UNDERSTANDING: 'ROLE_UNDERSTANDING',
+  PERFORMANCE: 'PERFORMANCE',
+} as const;
 
 @Injectable()
 export class SeedTemplatesUseCase {
   private readonly logger = new Logger(SeedTemplatesUseCase.name);
+  private dimensionMap: Map<string, Dimension> = new Map();
 
   constructor(
     private readonly createTemplateUseCase: CreateTemplateUseCase,
+    private readonly seedDimensionsUseCase: SeedDimensionsUseCase,
     @Inject('IEvaluationTemplateRepository')
     private readonly templateRepository: IEvaluationTemplateRepository,
+    @Inject('IDimensionRepository')
+    private readonly dimensionRepository: IDimensionRepository,
   ) {}
 
   async execute(): Promise<{ created: number; skipped: number; templates: EvaluationTemplate[] }> {
     this.logger.log('Starting template seed process');
+
+    // First, ensure dimensions are seeded
+    await this.seedDimensionsUseCase.execute();
+
+    // Load dimensions into map for easy access
+    await this.loadDimensions();
 
     const templates: EvaluationTemplate[] = [];
     let created = 0;
@@ -74,6 +93,22 @@ export class SeedTemplatesUseCase {
     return { created, skipped, templates };
   }
 
+  private async loadDimensions(): Promise<void> {
+    const dimensions = await this.dimensionRepository.findAll();
+    this.dimensionMap.clear();
+    for (const dim of dimensions) {
+      this.dimensionMap.set(dim.code, dim);
+    }
+  }
+
+  private getDimensionId(code: string): string {
+    const dim = this.dimensionMap.get(code);
+    if (!dim) {
+      throw new Error(`Dimension with code ${code} not found. Make sure dimensions are seeded.`);
+    }
+    return dim.id;
+  }
+
   private async seedDay1CollaboratorTemplate(): Promise<EvaluationTemplate | null> {
     const existing = await this.templateRepository.findActiveByMilestoneAndRole(
       EvaluationMilestone.DAY_1,
@@ -93,56 +128,56 @@ export class SeedTemplatesUseCase {
       questions: [
         {
           text: 'Accesos habilitados (correo, herramientas, plataformas)',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 1,
           required: true,
         },
         {
           text: 'Configuración inicial del equipo / ambiente técnico',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 2,
           required: true,
         },
         {
           text: 'Información inicial entregada y comprendida',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 3,
           required: true,
         },
         {
           text: 'Claridad de las funciones principales',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 4,
           required: true,
         },
         {
           text: 'Comprensión del proyecto y de los objetivos iniciales',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 5,
           required: true,
         },
         {
           text: 'Bienvenida recibida por el equipo o TL',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 6,
           required: true,
         },
         {
           text: 'Percepción de soporte y canales de comunicación disponibles',
-          dimension: QuestionDimension.COMMUNICATION,
+          dimensionId: this.getDimensionId(DIM_CODE.COMMUNICATION),
           type: QuestionType.SCALE_1_4,
           order: 7,
           required: true,
         },
         {
           text: 'Comentarios adicionales',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.OPEN_TEXT,
           order: 8,
           required: false,
@@ -172,70 +207,70 @@ export class SeedTemplatesUseCase {
       questions: [
         {
           text: '¿Te sientes integrado al equipo?',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 1,
           required: true,
         },
         {
           text: '¿Cómo ha sido la interacción con tus compañeros?',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 2,
           required: true,
         },
         {
           text: '¿Te sientes cómodo compartiendo tus ideas con el equipo?',
-          dimension: QuestionDimension.COMMUNICATION,
+          dimensionId: this.getDimensionId(DIM_CODE.COMMUNICATION),
           type: QuestionType.SCALE_1_4,
           order: 3,
           required: true,
         },
         {
           text: '¿Ya conoces la metodología de trabajo del equipo?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 4,
           required: true,
         },
         {
           text: '¿Lograste levantar tu ambiente de trabajo / setup técnico inicial?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 5,
           required: true,
         },
         {
           text: '¿Has podido realizar tus primeras contribuciones al código?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 6,
           required: true,
         },
         {
           text: '¿Cómo percibes la carga de trabajo asignada?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 7,
           required: true,
         },
         {
           text: '¿Crees que necesitarás aprender algo adicional para desempeñarte mejor?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 8,
           required: true,
         },
         {
           text: '¿Cómo evalúas tu desempeño en esta primera semana?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 9,
           required: true,
         },
         {
           text: 'Comentarios adicionales',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.OPEN_TEXT,
           order: 10,
           required: false,
@@ -265,35 +300,35 @@ export class SeedTemplatesUseCase {
       questions: [
         {
           text: '¿Cómo sientes que ha sido la integración del colaborador con el equipo en estos primeros días?',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 1,
           required: true,
         },
         {
           text: '¿Ha mostrado interés y comunicación fluida con el equipo y contigo? ¿Algún ejemplo?',
-          dimension: QuestionDimension.COMMUNICATION,
+          dimensionId: this.getDimensionId(DIM_CODE.COMMUNICATION),
           type: QuestionType.SCALE_1_4,
           order: 2,
           required: true,
         },
         {
           text: '¿Cómo ha sido su adaptación a la metodología de trabajo del equipo y sus responsabilidades iniciales?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 3,
           required: true,
         },
         {
           text: '¿Identificas alguna brecha o necesidad de soporte técnico o funcional en esta etapa?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 4,
           required: true,
         },
         {
           text: '¿El colaborador logró realizar su primera contribución al código o tareas asignadas?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 5,
           required: true,
@@ -323,77 +358,77 @@ export class SeedTemplatesUseCase {
       questions: [
         {
           text: '¿Qué tan integrado te sientes dentro del equipo?',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 1,
           required: true,
         },
         {
           text: '¿Te sientes cómodo compartiendo tus ideas en reuniones o discusiones técnicas?',
-          dimension: QuestionDimension.COMMUNICATION,
+          dimensionId: this.getDimensionId(DIM_CODE.COMMUNICATION),
           type: QuestionType.SCALE_1_4,
           order: 2,
           required: true,
         },
         {
           text: '¿Cómo describirías tu nivel de comprensión sobre los objetivos del proyecto y tu rol en el equipo?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 3,
           required: true,
         },
         {
           text: '¿Cómo ha sido tu experiencia en el proyecto hasta ahora?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 4,
           required: true,
         },
         {
           text: 'Nivel de satisfacción con los aspectos que más te han gustado del proyecto o del equipo',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 5,
           required: true,
         },
         {
           text: 'Nivel de incomodidad con los aspectos que menos te han gustado del proyecto o del equipo',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 6,
           required: true,
         },
         {
           text: '¿La experiencia en el trabajo ha cumplido tus expectativas iniciales? (Independiente del por qué)',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 7,
           required: true,
         },
         {
           text: '¿Qué es lo que más te ha llamado la atención durante este mes? (Nivel de apreciación general)',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 8,
           required: true,
         },
         {
           text: '¿Sientes que tu carga de trabajo es equilibrada y acorde a tus capacidades?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 9,
           required: true,
         },
         {
           text: '¿Has tenido que aprender o mejorar alguna habilidad técnica en estas semanas? (Nivel de dominio y crecimiento)',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 10,
           required: true,
         },
         {
           text: 'Comentarios adicionales',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.OPEN_TEXT,
           order: 11,
           required: false,
@@ -423,49 +458,49 @@ export class SeedTemplatesUseCase {
       questions: [
         {
           text: '¿Cómo describirías la relación del colaborador con el equipo después de este primer mes?',
-          dimension: QuestionDimension.INTEGRATION,
+          dimensionId: this.getDimensionId(DIM_CODE.INTEGRATION),
           type: QuestionType.SCALE_1_4,
           order: 1,
           required: true,
         },
         {
           text: '¿Se muestra proactivo al participar y proponer ideas en reuniones con el equipo?',
-          dimension: QuestionDimension.COMMUNICATION,
+          dimensionId: this.getDimensionId(DIM_CODE.COMMUNICATION),
           type: QuestionType.SCALE_1_4,
           order: 2,
           required: true,
         },
         {
           text: '¿Cómo percibes su nivel de motivación y compromiso con el proyecto?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 3,
           required: true,
         },
         {
           text: '¿Notas algún cambio respecto a su satisfacción desde la primera semana?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 4,
           required: true,
         },
         {
           text: '¿Cómo ha evolucionado su desempeño técnico y funcional en este primer mes?',
-          dimension: QuestionDimension.PERFORMANCE,
+          dimensionId: this.getDimensionId(DIM_CODE.PERFORMANCE),
           type: QuestionType.SCALE_1_4,
           order: 5,
           required: true,
         },
         {
           text: '¿Ha logrado asumir responsabilidades o tareas más complejas del negocio?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 6,
           required: true,
         },
         {
           text: '¿Qué tan bien entiende los objetivos del proyecto y la lógica del negocio?',
-          dimension: QuestionDimension.ROLE_UNDERSTANDING,
+          dimensionId: this.getDimensionId(DIM_CODE.ROLE_UNDERSTANDING),
           type: QuestionType.SCALE_1_4,
           order: 7,
           required: true,
@@ -476,6 +511,3 @@ export class SeedTemplatesUseCase {
     return this.createTemplateUseCase.execute(command);
   }
 }
-
-
-

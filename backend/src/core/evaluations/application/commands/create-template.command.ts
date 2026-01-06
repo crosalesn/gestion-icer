@@ -1,11 +1,10 @@
 import { EvaluationMilestone } from '../../domain/value-objects/evaluation-milestone.enum';
 import { TargetRole } from '../../domain/value-objects/target-role.enum';
-import { QuestionDimension } from '../../domain/value-objects/question-dimension.enum';
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
 
 export interface CreateQuestionData {
   text: string;
-  dimension: QuestionDimension;
+  dimensionId: string;
   type: QuestionType;
   order: number;
   required: boolean;
@@ -20,4 +19,3 @@ export class CreateTemplateCommand {
     public readonly questions: CreateQuestionData[],
   ) {}
 }
-

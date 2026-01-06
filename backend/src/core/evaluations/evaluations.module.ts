@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EvaluationController } from './presentation/controllers/evaluation.controller';
 import { SeedController } from './presentation/controllers/seed.controller';
+import { DimensionController } from './presentation/controllers/dimension.controller';
 import { CreateEvaluationUseCase } from './application/use-cases/create-evaluation.use-case';
 import { SubmitEvaluationUseCase } from './application/use-cases/submit-evaluation.use-case';
 import { GetCollaboratorEvaluationsUseCase } from './application/use-cases/get-collaborator-evaluations.use-case';
@@ -11,13 +12,16 @@ import { EvaluationOrmEntity } from './infrastructure/persistence/evaluation.orm
 import { CollaboratorsModule } from '../collaborators/collaborators.module';
 import { UsersModule } from '../users/users.module';
 import { ActionPlansModule } from '../action-plans/action-plans.module';
+import { FollowUpModule } from '../follow-up/follow-up.module';
 import { EvaluationTemplateOrmEntity } from './infrastructure/persistence/evaluation-template.orm-entity';
 import { QuestionOrmEntity } from './infrastructure/persistence/question.orm-entity';
+import { DimensionOrmEntity } from './infrastructure/persistence/dimension.orm-entity';
 import { EvaluationAssignmentOrmEntity } from './infrastructure/persistence/evaluation-assignment.orm-entity';
 import { MilestoneResultOrmEntity } from './infrastructure/persistence/milestone-result.orm-entity';
 import { PostgresEvaluationTemplateRepository } from './infrastructure/persistence/evaluation-template.repository';
 import { PostgresEvaluationAssignmentRepository } from './infrastructure/persistence/evaluation-assignment.repository';
 import { PostgresMilestoneResultRepository } from './infrastructure/persistence/milestone-result.repository';
+import { PostgresDimensionRepository } from './infrastructure/persistence/dimension.repository';
 import { AssignEvaluationUseCase } from './application/use-cases/assign-evaluation.use-case';
 import { GetPendingEvaluationsUseCase } from './application/use-cases/get-pending-evaluations.use-case';
 import { SubmitAssignmentAnswersUseCase } from './application/use-cases/submit-assignment-answers.use-case';
@@ -26,9 +30,16 @@ import { CreateTemplateUseCase } from './application/use-cases/create-template.u
 import { UpdateTemplateUseCase } from './application/use-cases/update-template.use-case';
 import { GetAllTemplatesUseCase } from './application/use-cases/get-all-templates.use-case';
 import { SeedTemplatesUseCase } from './application/use-cases/seed-templates.use-case';
+import { SeedDimensionsUseCase } from './application/use-cases/seed-dimensions.use-case';
+import { GetAllDimensionsUseCase } from './application/use-cases/get-all-dimensions.use-case';
+import { GetDimensionByIdUseCase } from './application/use-cases/get-dimension-by-id.use-case';
+import { CreateDimensionUseCase } from './application/use-cases/create-dimension.use-case';
+import { UpdateDimensionUseCase } from './application/use-cases/update-dimension.use-case';
+import { DeleteDimensionUseCase } from './application/use-cases/delete-dimension.use-case';
 import { GetCollaboratorMilestoneResultsUseCase } from './application/use-cases/get-collaborator-milestone-results.use-case';
 import { GetCollaboratorCompletedAssignmentsUseCase } from './application/use-cases/get-collaborator-completed-assignments.use-case';
 import { GetTemplateByIdUseCase } from './application/use-cases/get-template-by-id.use-case';
+import { AssignFollowUpPlanUseCase } from '../follow-up/application/use-cases/assign-follow-up-plan.use-case';
 
 @Module({
   imports: [
@@ -36,14 +47,16 @@ import { GetTemplateByIdUseCase } from './application/use-cases/get-template-by-
       EvaluationOrmEntity,
       EvaluationTemplateOrmEntity,
       QuestionOrmEntity,
+      DimensionOrmEntity,
       EvaluationAssignmentOrmEntity,
       MilestoneResultOrmEntity,
     ]),
     forwardRef(() => CollaboratorsModule), // Use forwardRef to avoid circular dependency
     UsersModule,
     ActionPlansModule,
+    FollowUpModule,
   ],
-  controllers: [EvaluationController, SeedController],
+  controllers: [EvaluationController, SeedController, DimensionController],
   providers: [
     CreateEvaluationUseCase,
     SubmitEvaluationUseCase,
@@ -57,9 +70,16 @@ import { GetTemplateByIdUseCase } from './application/use-cases/get-template-by-
     UpdateTemplateUseCase,
     GetAllTemplatesUseCase,
     SeedTemplatesUseCase,
+    SeedDimensionsUseCase,
+    GetAllDimensionsUseCase,
+    GetDimensionByIdUseCase,
+    CreateDimensionUseCase,
+    UpdateDimensionUseCase,
+    DeleteDimensionUseCase,
     GetCollaboratorMilestoneResultsUseCase,
     GetCollaboratorCompletedAssignmentsUseCase,
     GetTemplateByIdUseCase,
+    AssignFollowUpPlanUseCase,
     {
       provide: 'IEvaluationRepository',
       useClass: PostgresEvaluationRepository,
@@ -76,14 +96,19 @@ import { GetTemplateByIdUseCase } from './application/use-cases/get-template-by-
       provide: 'IMilestoneResultRepository',
       useClass: PostgresMilestoneResultRepository,
     },
+    {
+      provide: 'IDimensionRepository',
+      useClass: PostgresDimensionRepository,
+    },
   ],
   exports: [
     'IEvaluationRepository',
     'IEvaluationTemplateRepository',
     'IEvaluationAssignmentRepository',
     'IMilestoneResultRepository',
+    'IDimensionRepository',
     AssignEvaluationUseCase,
+    SeedDimensionsUseCase,
   ],
 })
 export class EvaluationsModule {}
-

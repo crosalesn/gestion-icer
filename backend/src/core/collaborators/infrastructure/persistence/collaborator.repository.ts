@@ -19,7 +19,16 @@ export class PostgresCollaboratorRepository implements ICollaboratorRepository {
   }
 
   async findById(id: string): Promise<Collaborator | null> {
-    const ormEntity = await this.repository.findOne({ where: { id } });
+    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
+    return ormEntity ? CollaboratorMapper.toDomain(ormEntity) : null;
+  }
+
+  async findByInternalId(internalId: string): Promise<Collaborator | null> {
+    const numericId = Number(internalId);
+    if (isNaN(numericId)) {
+      return null;
+    }
+    const ormEntity = await this.repository.findOne({ where: { id: numericId } });
     return ormEntity ? CollaboratorMapper.toDomain(ormEntity) : null;
   }
 
@@ -34,7 +43,7 @@ export class PostgresCollaboratorRepository implements ICollaboratorRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
+    await this.repository.delete({ uuid: id });
   }
 }
 

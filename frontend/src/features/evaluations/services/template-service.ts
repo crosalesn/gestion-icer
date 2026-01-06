@@ -8,7 +8,7 @@ interface CreateTemplatePayload {
   description?: string;
   questions: Array<{
     text: string;
-    dimension: string;
+    dimensionId: string;
     type: string;
     order: number;
     required: boolean;
@@ -22,7 +22,7 @@ interface UpdateTemplatePayload {
   questions?: Array<{
     id?: string;
     text: string;
-    dimension: string;
+    dimensionId: string;
     type: string;
     order: number;
     required: boolean;
@@ -48,10 +48,6 @@ const templateService = {
   update: async (id: string, payload: UpdateTemplatePayload): Promise<EvaluationTemplate> => {
     const response = await api.put<EvaluationTemplate>(`/evaluations/templates/${id}`, payload);
     return response.data;
-  },
-
-  seed: async (): Promise<void> => {
-    await api.post('/evaluations/templates/seed');
   }
 };
 

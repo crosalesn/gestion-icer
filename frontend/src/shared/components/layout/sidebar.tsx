@@ -11,7 +11,8 @@ import {
   BarChart2,
   ClipboardCheck,
   Target,
-  FileEdit
+  FileEdit,
+  Building2
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -42,7 +43,10 @@ const navigation: (NavGroup | NavItem)[] = [
     icon: <Settings size={20} />,
     items: [
       { name: 'Usuarios', to: '/usuarios', icon: <Users size={18} /> },
-      { name: 'Plantillas', to: '/evaluaciones/plantillas', icon: <FileEdit size={18} /> },
+      { name: 'Clientes', to: '/clientes', icon: <Building2 size={18} /> },
+      { name: 'Dimensiones', to: '/evaluaciones/dimensiones', icon: <FileText size={18} /> },
+      { name: 'Plantillas Evaluaciones', to: '/evaluaciones/plantillas', icon: <FileEdit size={18} /> },
+      { name: 'Plantillas Seguimiento', to: '/planes-seguimiento/configuracion', icon: <FileText size={18} /> },
     ]
   },
   {

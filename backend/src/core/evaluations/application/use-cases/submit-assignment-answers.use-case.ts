@@ -11,6 +11,7 @@ import { EvaluationMilestone } from '../../domain/value-objects/evaluation-miles
 import { AssignEvaluationUseCase } from './assign-evaluation.use-case';
 import { AssignEvaluationCommand } from '../commands/assign-evaluation.command';
 import type { ICollaboratorRepository } from '../../../collaborators/domain/repositories/collaborator.repository.interface';
+import { Collaborator } from '../../../collaborators/domain/entities/collaborator.entity';
 import { RiskCalculatorService } from '../../domain/services/risk-calculator.service';
 import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-level.enum';
 import { AssignActionPlanUseCase } from '../../../action-plans/application/use-cases/assign-action-plan.use-case';
@@ -68,8 +69,17 @@ export class SubmitAssignmentAnswersUseCase {
     // Update collaborator risk level directly from this evaluation
     // The risk level is always updated to reflect the latest evaluation
     try {
-      await this.updateCollaboratorRisk(
+      // assignment.collaboratorId is the internal numeric ID (as string)
+      // We need to lookup the collaborator by internal ID to get the UUID for other operations
+      const collaborator = await this.collaboratorRepository.findByInternalId(
         assignment.collaboratorId,
+      );
+      if (!collaborator) {
+        throw new Error(`Collaborator with internal ID ${assignment.collaboratorId} not found`);
+      }
+
+      await this.updateCollaboratorRisk(
+        collaborator,
         score,
         assignment.milestone,
       );
@@ -77,12 +87,13 @@ export class SubmitAssignmentAnswersUseCase {
       // Calculate and create milestone result for display in collaborator detail
       // This creates the consolidated result that shows in the UI
       try {
+        // Use the internal ID for milestone result (as it uses numeric ID for FK)
         await this.calculateMilestoneResultUseCase.execute(
           assignment.collaboratorId,
           assignment.milestone,
         );
         this.logger.log(
-          `Milestone result calculated for collaborator ${assignment.collaboratorId}, milestone ${assignment.milestone}`,
+          `Milestone result calculated for collaborator ${collaborator.id}, milestone ${assignment.milestone}`,
         );
       } catch (error) {
         // Log but don't fail if milestone result calculation fails
@@ -92,8 +103,8 @@ export class SubmitAssignmentAnswersUseCase {
         );
       }
       
-      // Create next evaluation automatically
-      await this.createNextEvaluation(assignment.collaboratorId, assignment.milestone);
+      // Create next evaluation automatically - use UUID for AssignEvaluationCommand
+      await this.createNextEvaluation(collaborator.id, assignment.milestone);
     } catch (error) {
       // Log but don't fail the submission if risk update or next evaluation creation fails
       this.logger.warn(
@@ -108,6 +119,22 @@ export class SubmitAssignmentAnswersUseCase {
     collaboratorId: string,
     currentMilestone: EvaluationMilestone,
   ): Promise<void> {
+    // Check if there are other pending assignments for the current milestone
+    // We only advance to the next milestone when ALL assignments for the current one are completed
+    const currentMilestoneAssignments = await this.assignmentRepository.findByCollaboratorAndMilestone(
+      collaboratorId,
+      currentMilestone,
+    );
+    
+    const hasPending = currentMilestoneAssignments.some(
+      (a) => a.status !== EvaluationStatus.COMPLETED
+    );
+
+    if (hasPending) {
+      this.logger.log(`There are still pending assignments for milestone ${currentMilestone}. Next milestone will not be created yet.`);
+      return;
+    }
+
     let nextMilestone: EvaluationMilestone | null = null;
 
     // Determine next milestone
@@ -200,15 +227,10 @@ export class SubmitAssignmentAnswersUseCase {
    * Automatically creates action plans for HIGH or MEDIUM risk levels.
    */
   private async updateCollaboratorRisk(
-    collaboratorId: string,
+    collaborator: Collaborator,
     score: number,
     milestone: EvaluationMilestone,
   ): Promise<void> {
-    const collaborator = await this.collaboratorRepository.findById(collaboratorId);
-    if (!collaborator) {
-      throw new Error(`Collaborator ${collaboratorId} not found`);
-    }
-
     // Calculate risk level from score
     const riskLevel = RiskCalculatorService.calculateRiskFromScore(score);
 
@@ -217,11 +239,12 @@ export class SubmitAssignmentAnswersUseCase {
     await this.collaboratorRepository.save(collaborator);
 
     this.logger.log(
-      `Updated collaborator ${collaboratorId} risk level to ${riskLevel} based on score ${score}`,
+      `Updated collaborator ${collaborator.id} risk level to ${riskLevel} based on score ${score}`,
     );
 
     // Create automatic action plan if risk is HIGH or MEDIUM
-    await this.handleActionPlanCreation(collaboratorId, riskLevel, milestone, score);
+    // Use UUID for action plan creation
+    await this.handleActionPlanCreation(collaborator.id, riskLevel, milestone, score);
   }
 
   /**

@@ -20,13 +20,13 @@ export class PostgresActionPlanRepository implements IActionPlanRepository {
   }
 
   async findById(id: string): Promise<ActionPlan | null> {
-    const ormEntity = await this.repository.findOne({ where: { id } });
+    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
     return ormEntity ? ActionPlanMapper.toDomain(ormEntity) : null;
   }
 
   async findByCollaboratorId(collaboratorId: string): Promise<ActionPlan[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId },
+      where: { collaboratorId: Number(collaboratorId) },
       order: { createdAt: 'DESC' },
     });
     return ormEntities.map((orm) => ActionPlanMapper.toDomain(orm));
@@ -36,9 +36,16 @@ export class PostgresActionPlanRepository implements IActionPlanRepository {
     collaboratorId: string,
   ): Promise<ActionPlan | null> {
     const ormEntity = await this.repository.findOne({
-      where: { collaboratorId, status: ActionPlanStatus.ACTIVE },
+      where: { collaboratorId: Number(collaboratorId), status: ActionPlanStatus.ACTIVE },
     });
     return ormEntity ? ActionPlanMapper.toDomain(ormEntity) : null;
+  }
+
+  async findAll(): Promise<ActionPlan[]> {
+    const ormEntities = await this.repository.find({
+      order: { createdAt: 'DESC' },
+    });
+    return ormEntities.map((orm) => ActionPlanMapper.toDomain(orm));
   }
 }
 

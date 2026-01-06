@@ -5,5 +5,6 @@ export interface IActionPlanRepository {
   findById(id: string): Promise<ActionPlan | null>;
   findByCollaboratorId(collaboratorId: string): Promise<ActionPlan[]>;
   findActiveByCollaboratorId(collaboratorId: string): Promise<ActionPlan | null>;
+  findAll(): Promise<ActionPlan[]>;
 }
 

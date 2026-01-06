@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { EvaluationTemplate } from '../../domain/entities/evaluation-template.entity';
 import { EvaluationMilestone } from '../../domain/value-objects/evaluation-milestone.enum';
 import { TargetRole } from '../../domain/value-objects/target-role.enum';
-import { QuestionDimension } from '../../domain/value-objects/question-dimension.enum';
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
+import { DimensionResponseDto } from './dimension-response.dto';
 
 export class QuestionResponseDto {
   @ApiProperty()
@@ -12,8 +12,11 @@ export class QuestionResponseDto {
   @ApiProperty()
   text: string;
 
-  @ApiProperty({ enum: QuestionDimension })
-  dimension: QuestionDimension;
+  @ApiProperty()
+  dimensionId: string;
+
+  @ApiProperty({ type: () => DimensionResponseDto, required: false })
+  dimension?: DimensionResponseDto;
 
   @ApiProperty({ enum: QuestionType })
   type: QuestionType;
@@ -67,10 +70,16 @@ export class TemplateResponseDto {
       const questionDto = new QuestionResponseDto();
       questionDto.id = q.id;
       questionDto.text = q.text;
-      questionDto.dimension = q.dimension;
+      questionDto.dimensionId = q.dimensionId;
       questionDto.type = q.type;
       questionDto.order = q.order;
       questionDto.required = q.required;
+
+      // Include dimension info if available
+      if (q.dimension) {
+        questionDto.dimension = DimensionResponseDto.fromDomain(q.dimension);
+      }
+
       return questionDto;
     });
     dto.isActive = template.isActive;
@@ -80,4 +89,3 @@ export class TemplateResponseDto {
     return dto;
   }
 }
-

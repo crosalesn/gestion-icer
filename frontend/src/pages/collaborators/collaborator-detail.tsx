@@ -229,25 +229,49 @@ const CollaboratorDetail = () => {
                     </div>
                     
                     <div className="pt-4 border-t border-gray-100">
-                      <label className="text-xs font-semibold text-gray-500 uppercase block mb-2">Plan de Acción</label>
+                      <label className="text-xs font-semibold text-gray-500 uppercase block mb-2">Plan de Acción / Seguimiento</label>
                       {activeActionPlan ? (
-                           <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
-                              <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2">
-                                  <Target size={16} /> {activeActionPlan.type}
-                              </h4>
-                              <p className="text-xs text-blue-700 mt-1">{activeActionPlan.description}</p>
-                              <p className="text-xs text-blue-500 mt-2 font-medium">
-                                Vence: {format(parseISO(activeActionPlan.dueDate), 'dd/MM/yyyy')}
+                           <div className="bg-blue-50 p-4 rounded-md border border-blue-100 shadow-sm">
+                              <div className="flex justify-between items-start">
+                                <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                                    <Target size={16} /> {activeActionPlan.type}
+                                </h4>
+                                <span className={clsx(
+                                  "text-[10px] px-2 py-0.5 rounded-full font-bold",
+                                  activeActionPlan.status === 'ACTIVE' ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                                )}>
+                                  {activeActionPlan.status === 'ACTIVE' ? 'ACTIVO' : activeActionPlan.status}
+                                </span>
+                              </div>
+                              
+                              <p className="text-xs text-blue-700 mt-2 font-medium line-clamp-3 leading-relaxed">
+                                {activeActionPlan.description}
                               </p>
+                              
+                              <div className="mt-3 flex items-center gap-2 text-xs text-blue-500 font-medium bg-blue-100/50 p-1.5 rounded">
+                                <Calendar size={12} />
+                                Vence: {format(parseISO(activeActionPlan.dueDate), 'dd/MM/yyyy')}
+                              </div>
+                              
+                              <Button 
+                                variant="outline" 
+                                className="w-full mt-3 text-xs h-7 bg-white hover:bg-blue-50 border-blue-200 text-blue-700"
+                                onClick={() => navigate(`/planes`)} // Navigate to plans list for now, ideally to plan detail
+                              >
+                                Ver Detalle
+                              </Button>
                            </div>
                       ) : (
-                          <Button 
-                              variant="outline" 
-                              className="w-full text-xs justify-center border-dashed"
-                              onClick={() => navigate(`/planes/asignar/${id}`, { state: { collaboratorName: collaborator.name } })}
-                          >
-                              <Target size={14} className="mr-2"/> Asignar Plan
-                          </Button>
+                          <div className="text-center p-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                            <p className="text-xs text-gray-500 mb-3">No hay un plan activo asignado.</p>
+                            <Button 
+                                variant="outline" 
+                                className="w-full text-xs justify-center"
+                                onClick={() => navigate(`/planes/asignar/${id}`, { state: { collaboratorName: collaborator.name } })}
+                            >
+                                <Target size={14} className="mr-2"/> Asignar Manualmente
+                            </Button>
+                          </div>
                       )}
                     </div>
                 </div>

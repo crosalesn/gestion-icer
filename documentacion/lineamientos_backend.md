@@ -413,6 +413,167 @@ Anotaciones de controllers y respuestas.
 - Utilizar `typeorm-naming-strategies` para asegurar la convención `snake_case` en la base de datos (PostgreSQL).
 - Las entidades deben usar decoradores estándar de TypeORM (`@Entity`, `@Column`, `@PrimaryGeneratedColumn`).
 
+### 15.2 Estrategia de Claves Primarias y UUIDs
+
+**Regla clave:**
+> Internamente, la base de datos debe gestionar las relaciones con claves numéricas pequeñas y eficientes (int o bigint). Cuando una referencia a datos necesita ser expuesta al exterior —incluso cuando "exterior" significa otro sistema interno—, se debe usar exclusivamente UUID.
+
+**¿Cuándo agregar UUID a una entidad?**
+
+El uso de UUID **NO es obligatorio para todas las entidades**. Solo debe usarse en entidades que:
+
+1. Se exponen directamente a través de APIs públicas o internas
+2. Son referenciadas en URLs, enlaces o comunicaciones externas
+3. Pueden ser consultadas o manipuladas por sistemas externos
+4. Representan recursos de negocio principales (no datos de catálogo)
+
+**Entidades que SÍ requieren UUID (expuestas externamente):**
+| Entidad | Justificación |
+|---------|---------------|
+| `Collaborator` | Entidad principal, referenciada en reportes y APIs |
+| `User` | Gestión de usuarios, autenticación |
+| `Evaluation` | Puede compartirse con evaluadores externos |
+| `EvaluationAssignment` | Enlaces únicos para evaluadores |
+| `ActionPlan` | Reportes y seguimiento externo |
+
+**Entidades que NO requieren UUID (datos internos/catálogo):**
+| Entidad | Justificación |
+|---------|---------------|
+| `Dimension` | Datos de catálogo, solo referenciados internamente |
+| `Question` | Parte de templates, sin exposición directa |
+| `EvaluationTemplate` | Configuración interna del sistema |
+| `MilestoneResult` | Resultados calculados internos |
+| `FollowUpPlanTemplate` | Templates de configuración |
+
+> **Nota:** Las entidades de catálogo no deben tener UUID. Si ya existe, puede eliminarse durante una refactorización planificada.
+
+**Implementación:**
+
+1. **Clave primaria interna**: Usar `@PrimaryGeneratedColumn()` para generar IDs numéricos secuenciales automáticos.
+2. **UUID para exposición externa**: Agregar una columna `uuid` con generación automática y constraint `UNIQUE`.
+3. **Relaciones internas (FK)**: Usar las claves numéricas (`id`) para JOINs y referencias entre tablas.
+4. **APIs y sistemas externos**: Exponer únicamente el `uuid`, nunca el `id` numérico interno.
+
+```ts
+// Entidad CON UUID (expuesta externamente)
+@Entity('collaborators')
+export class CollaboratorOrmEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'uuid', unique: true, generated: 'uuid' })
+  uuid: string;
+
+  // ... otros campos
+}
+
+// Entidad SIN UUID (datos de catálogo internos)
+@Entity('dimensions')
+export class DimensionOrmEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'varchar', length: 50, unique: true })
+  code: string;  // Usar código legible en lugar de UUID para catálogos
+
+  // ... otros campos
+}
+
+// FK usando id numérico de otra entidad
+@Entity('evaluations')
+export class EvaluationOrmEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'uuid', unique: true, generated: 'uuid' })
+  uuid: string;
+
+  @Column({ name: 'collaborator_id', type: 'int' })
+  collaboratorId: number;
+
+  @ManyToOne(() => CollaboratorOrmEntity)
+  @JoinColumn({ name: 'collaborator_id' })
+  collaborator: CollaboratorOrmEntity;
+}
+```
+
+**Beneficios:**
+- **Rendimiento**: JOINs y búsquedas más rápidas con índices numéricos.
+- **Espacio**: Claves numéricas ocupan menos espacio que UUIDs.
+- **Seguridad**: Los UUIDs no revelan información sobre el orden o cantidad de registros.
+- **Flexibilidad**: Permite cambiar UUIDs sin afectar relaciones internas.
+- **Claridad**: No todas las entidades necesitan la complejidad adicional del UUID.
+
+### 15.3 Mapeo entre Dominio y Persistencia
+
+Los **Mappers** son responsables de la conversión entre entidades de dominio y entidades ORM:
+
+**Para entidades CON UUID (expuestas externamente):**
+```ts
+export class CollaboratorMapper {
+  static toDomain(orm: CollaboratorOrmEntity): Collaborator {
+    return Collaborator.reconstitute(
+      orm.uuid, // ← UUID se convierte en el ID del dominio
+      orm.name,
+      // ... otros campos
+    );
+  }
+
+  static toOrm(domain: Collaborator): CollaboratorOrmEntity {
+    const orm = new CollaboratorOrmEntity();
+    orm.uuid = domain.id; // ← ID del dominio se mapea al UUID
+    // uuid se genera automáticamente en la BD para nuevos registros
+    // ... otros campos
+    return orm;
+  }
+}
+```
+
+**Para entidades SIN UUID (datos internos/catálogo):**
+```ts
+export class DimensionMapper {
+  static toDomain(orm: DimensionOrmEntity): Dimension {
+    return Dimension.reconstitute(
+      String(orm.id), // ← Convertir ID numérico a string
+      orm.code,
+      // ... otros campos
+    );
+  }
+
+  static toOrm(domain: Dimension): DimensionOrmEntity {
+    const orm = new DimensionOrmEntity();
+    if (domain.id) {
+      orm.id = Number(domain.id); // ← Convertir string a número
+    }
+    // ... otros campos
+    return orm;
+  }
+}
+```
+
+**Consultas en Repositorios:**
+```ts
+// Para entidades CON UUID: buscar por uuid
+async findById(id: string): Promise<Collaborator | null> {
+  const orm = await this.repository.findOne({ where: { uuid: id } });
+  return orm ? CollaboratorMapper.toDomain(orm) : null;
+}
+
+// Para entidades SIN UUID: buscar por id numérico
+async findById(id: string): Promise<Dimension | null> {
+  const orm = await this.repository.findOne({ where: { id: Number(id) } });
+  return orm ? DimensionMapper.toDomain(orm) : null;
+}
+
+// Para FKs numéricas: convertir el ID del dominio
+async findByCollaboratorId(collaboratorId: string): Promise<ActionPlan[]> {
+  const orms = await this.repository.find({
+    where: { collaboratorId: Number(collaboratorId) },
+  });
+  return orms.map(ActionPlanMapper.toDomain);
+}
+```
+
 ```ts
 // Ejemplo de configuración en AppModule o DatabaseModule
 TypeOrmModule.forRoot({

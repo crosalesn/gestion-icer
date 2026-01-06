@@ -1,14 +1,15 @@
-import { QuestionDimension } from '../value-objects/question-dimension.enum';
 import { QuestionType } from '../value-objects/question-type.enum';
+import { Dimension } from './dimension.entity';
 
 export class Question {
   constructor(
     private readonly _id: string,
     private readonly _text: string,
-    private readonly _dimension: QuestionDimension,
+    private readonly _dimensionId: string,
     private readonly _type: QuestionType,
     private readonly _order: number,
     private readonly _required: boolean,
+    private readonly _dimension?: Dimension,
   ) {}
 
   get id(): string {
@@ -19,7 +20,11 @@ export class Question {
     return this._text;
   }
 
-  get dimension(): QuestionDimension {
+  get dimensionId(): string {
+    return this._dimensionId;
+  }
+
+  get dimension(): Dimension | undefined {
     return this._dimension;
   }
 
@@ -38,23 +43,23 @@ export class Question {
   static create(
     id: string,
     text: string,
-    dimension: QuestionDimension,
+    dimensionId: string,
     type: QuestionType,
     order: number,
     required: boolean,
   ): Question {
-    return new Question(id, text, dimension, type, order, required);
+    return new Question(id, text, dimensionId, type, order, required);
   }
 
   static reconstitute(
     id: string,
     text: string,
-    dimension: QuestionDimension,
+    dimensionId: string,
     type: QuestionType,
     order: number,
     required: boolean,
+    dimension?: Dimension,
   ): Question {
-    return new Question(id, text, dimension, type, order, required);
+    return new Question(id, text, dimensionId, type, order, required, dimension);
   }
 }
-

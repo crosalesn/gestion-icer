@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
@@ -12,18 +12,18 @@ import { QuestionOrmEntity } from './question.orm-entity';
 
 @Entity('evaluation_templates')
 export class EvaluationTemplateOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({
-    type: 'enum',
-    enum: EvaluationMilestone,
+    type: 'varchar',
+    length: 50,
   })
   milestone: EvaluationMilestone;
 
   @Column({
-    type: 'enum',
-    enum: TargetRole,
+    type: 'varchar',
+    length: 50,
     name: 'target_role',
   })
   targetRole: TargetRole;
@@ -31,7 +31,7 @@ export class EvaluationTemplateOrmEntity {
   @Column()
   title: string;
 
-  @Column('text', { nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   description: string | null;
 
   @OneToMany(() => QuestionOrmEntity, (question) => question.template, {
@@ -40,7 +40,7 @@ export class EvaluationTemplateOrmEntity {
   })
   questions: QuestionOrmEntity[];
 
-  @Column({ name: 'is_active', default: true })
+  @Column({ type: 'bit', name: 'is_active', default: true })
   isActive: boolean;
 
   @Column('int', { default: 1 })

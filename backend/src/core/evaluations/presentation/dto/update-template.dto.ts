@@ -8,7 +8,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { QuestionDimension } from '../../domain/value-objects/question-dimension.enum';
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
 import { UpdateTemplateCommand } from '../../application/commands/update-template.command';
 
@@ -29,12 +28,11 @@ export class UpdateQuestionDto {
   text?: string;
 
   @ApiProperty({
-    enum: QuestionDimension,
-    description: 'Dimensión ICER de la pregunta',
+    description: 'ID de la dimensión ICER de la pregunta (ID numérico como string)',
   })
-  @IsEnum(QuestionDimension)
+  @IsString()
   @IsOptional()
-  dimension?: QuestionDimension;
+  dimensionId?: string;
 
   @ApiProperty({
     enum: QuestionType,
@@ -107,7 +105,7 @@ export class UpdateTemplateDto {
       ?.filter(
         (q) =>
           q.text !== undefined &&
-          q.dimension !== undefined &&
+          q.dimensionId !== undefined &&
           q.type !== undefined &&
           q.order !== undefined &&
           q.required !== undefined,
@@ -115,7 +113,7 @@ export class UpdateTemplateDto {
       .map((q) => ({
         id: q.id,
         text: q.text!,
-        dimension: q.dimension!,
+        dimensionId: q.dimensionId!,
         type: q.type!,
         order: q.order!,
         required: q.required!,
@@ -131,4 +129,3 @@ export class UpdateTemplateDto {
     );
   }
 }
-

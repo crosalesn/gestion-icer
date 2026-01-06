@@ -11,7 +11,6 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { EvaluationMilestone } from '../../domain/value-objects/evaluation-milestone.enum';
 import { TargetRole } from '../../domain/value-objects/target-role.enum';
-import { QuestionDimension } from '../../domain/value-objects/question-dimension.enum';
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
 import { CreateTemplateCommand } from '../../application/commands/create-template.command';
 
@@ -25,12 +24,12 @@ export class CreateQuestionDto {
   text: string;
 
   @ApiProperty({
-    enum: QuestionDimension,
-    description: 'Dimensión ICER de la pregunta',
+    description: 'ID de la dimensión ICER de la pregunta (ID numérico como string)',
+    example: '1',
   })
-  @IsEnum(QuestionDimension)
+  @IsString()
   @IsNotEmpty()
-  dimension: QuestionDimension;
+  dimensionId: string;
 
   @ApiProperty({
     enum: QuestionType,
@@ -107,7 +106,7 @@ export class CreateTemplateDto {
       this.description || null,
       this.questions.map((q) => ({
         text: q.text,
-        dimension: q.dimension,
+        dimensionId: q.dimensionId,
         type: q.type,
         order: q.order,
         required: q.required !== undefined ? q.required : true,
@@ -115,4 +114,3 @@ export class CreateTemplateDto {
     );
   }
 }
-

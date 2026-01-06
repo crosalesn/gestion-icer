@@ -1,45 +1,45 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { QuestionDimension } from '../../domain/value-objects/question-dimension.enum';
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
 import { EvaluationTemplateOrmEntity } from './evaluation-template.orm-entity';
+import { DimensionOrmEntity } from './dimension.orm-entity';
 
 @Entity('questions')
 export class QuestionOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'template_id', type: 'uuid' })
-  templateId: string;
+  @Column({ name: 'template_id', type: 'int' })
+  templateId: number;
 
   @ManyToOne(() => EvaluationTemplateOrmEntity)
   @JoinColumn({ name: 'template_id' })
   template: EvaluationTemplateOrmEntity;
 
-  @Column('text')
+  @Column({ type: 'nvarchar', length: 'MAX' })
   text: string;
 
-  @Column({
-    type: 'enum',
-    enum: QuestionDimension,
-  })
-  dimension: QuestionDimension;
+  @Column({ name: 'dimension_id', type: 'int' })
+  dimensionId: number;
+
+  @ManyToOne(() => DimensionOrmEntity)
+  @JoinColumn({ name: 'dimension_id' })
+  dimension: DimensionOrmEntity;
 
   @Column({
-    type: 'enum',
-    enum: QuestionType,
+    type: 'varchar',
+    length: 50,
   })
   type: QuestionType;
 
   @Column('int')
   order: number;
 
-  @Column('boolean')
+  @Column('bit')
   required: boolean;
 }
-

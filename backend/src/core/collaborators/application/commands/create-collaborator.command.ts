@@ -6,5 +6,6 @@ export class CreateCollaboratorCommand {
     public readonly project: string,
     public readonly role: string,
     public readonly teamLeader: string,
+    public readonly clientId: string,
   ) {}
 }

@@ -24,8 +24,8 @@ export class PostgresEvaluationTemplateRepository
 
   async findById(id: string): Promise<EvaluationTemplate | null> {
     const ormEntity = await this.repository.findOne({
-      where: { id },
-      relations: ['questions'],
+      where: { id: Number(id) },
+      relations: ['questions', 'questions.dimension'],
     });
     return ormEntity ? EvaluationTemplateMapper.toDomain(ormEntity) : null;
   }
@@ -36,7 +36,7 @@ export class PostgresEvaluationTemplateRepository
   ): Promise<EvaluationTemplate | null> {
     const ormEntity = await this.repository.findOne({
       where: { milestone, targetRole },
-      relations: ['questions'],
+      relations: ['questions', 'questions.dimension'],
       order: { version: 'DESC' },
     });
     return ormEntity ? EvaluationTemplateMapper.toDomain(ormEntity) : null;
@@ -44,7 +44,7 @@ export class PostgresEvaluationTemplateRepository
 
   async findAll(): Promise<EvaluationTemplate[]> {
     const ormEntities = await this.repository.find({
-      relations: ['questions'],
+      relations: ['questions', 'questions.dimension'],
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationTemplateMapper.toDomain(orm));
@@ -56,7 +56,7 @@ export class PostgresEvaluationTemplateRepository
   ): Promise<EvaluationTemplate | null> {
     const ormEntity = await this.repository.findOne({
       where: { milestone, targetRole, isActive: true },
-      relations: ['questions'],
+      relations: ['questions', 'questions.dimension'],
       order: { version: 'DESC' },
     });
     return ormEntity ? EvaluationTemplateMapper.toDomain(ormEntity) : null;

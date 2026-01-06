@@ -8,13 +8,15 @@ import { clsx } from 'clsx';
 import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import templateService from '../../features/evaluations/services/template-service';
+import dimensionsService from '../../features/evaluations/services/dimensions-service';
 import type { EvaluationTemplate } from '../../features/evaluations/types/template.types';
-import { EvaluationMilestone, TargetRole, QuestionDimension, QuestionType } from '../../features/evaluations/types/template.types';
+import type { Dimension } from '../../features/evaluations/types/dimension.types';
+import { EvaluationMilestone, TargetRole, QuestionType } from '../../features/evaluations/types/template.types';
 
 interface QuestionFormData {
   id?: string;
   text: string;
-  dimension: QuestionDimension;
+  dimensionId: string;
   type: QuestionType;
   order: number;
   required: boolean;
@@ -35,6 +37,7 @@ const TemplateEditor = () => {
   const isNew = !id || id === 'nueva';
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [dimensions, setDimensions] = useState<Dimension[]>([]);
 
   const { register, control, handleSubmit, reset, setValue, watch } = useForm<TemplateFormData>({
     defaultValues: {
@@ -55,6 +58,22 @@ const TemplateEditor = () => {
   // Watch questions to update order
   const questions = watch('questions');
 
+  // Load dimensions from backend
+  useEffect(() => {
+    const fetchDimensions = async () => {
+      try {
+        const data = await dimensionsService.getAll();
+        // Filter only active dimensions
+        const activeDimensions = data.filter(d => d.isActive).sort((a, b) => a.order - b.order);
+        setDimensions(activeDimensions);
+      } catch (error) {
+        console.error('Error fetching dimensions:', error);
+        toast.error('Error al cargar las dimensiones');
+      }
+    };
+    fetchDimensions();
+  }, []);
+
   useEffect(() => {
     if (!isNew && id) {
       const fetchTemplate = async () => {
@@ -66,7 +85,14 @@ const TemplateEditor = () => {
             milestone: template.milestone,
             targetRole: template.targetRole,
             isActive: template.isActive,
-            questions: template.questions.sort((a, b) => a.order - b.order)
+            questions: template.questions.sort((a, b) => a.order - b.order).map(q => ({
+              id: q.id,
+              text: q.text,
+              dimensionId: q.dimensionId,
+              type: q.type,
+              order: q.order,
+              required: q.required
+            }))
           });
         } catch (error) {
           console.error('Error fetching template:', error);
@@ -119,9 +145,11 @@ const TemplateEditor = () => {
   };
 
   const addQuestion = () => {
+    // Use first available dimension or empty string if none available
+    const defaultDimensionId = dimensions.length > 0 ? dimensions[0].id : '';
     append({
       text: '',
-      dimension: QuestionDimension.PERFORMANCE,
+      dimensionId: defaultDimensionId,
       type: QuestionType.SCALE_1_4,
       order: fields.length + 1,
       required: true
@@ -168,13 +196,18 @@ const TemplateEditor = () => {
             <div>
               <label className="text-xs font-medium text-gray-500 mb-1 block">Dimensión</label>
               <select
-                {...register(`questions.${index}.dimension` as const)}
+                {...register(`questions.${index}.dimensionId` as const, { required: true })}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
               >
-                <option value={QuestionDimension.INTEGRATION}>Integración</option>
-                <option value={QuestionDimension.COMMUNICATION}>Comunicación</option>
-                <option value={QuestionDimension.ROLE_UNDERSTANDING}>Entendimiento del Rol</option>
-                <option value={QuestionDimension.PERFORMANCE}>Rendimiento</option>
+                {dimensions.length === 0 ? (
+                  <option value="">Cargando dimensiones...</option>
+                ) : (
+                  dimensions.map((dim) => (
+                    <option key={dim.id} value={dim.id}>
+                      {dim.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
 
@@ -356,13 +389,18 @@ const TemplateEditor = () => {
                                   <div>
                                     <label className="text-xs font-medium text-gray-500 mb-1 block">Dimensión</label>
                                     <select
-                                      {...register(`questions.${index}.dimension` as const)}
+                                      {...register(`questions.${index}.dimensionId` as const, { required: true })}
                                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
                                     >
-                                      <option value={QuestionDimension.INTEGRATION}>Integración</option>
-                                      <option value={QuestionDimension.COMMUNICATION}>Comunicación</option>
-                                      <option value={QuestionDimension.ROLE_UNDERSTANDING}>Entendimiento del Rol</option>
-                                      <option value={QuestionDimension.PERFORMANCE}>Rendimiento</option>
+                                      {dimensions.length === 0 ? (
+                                        <option value="">Cargando dimensiones...</option>
+                                      ) : (
+                                        dimensions.map((dim) => (
+                                          <option key={dim.id} value={dim.id}>
+                                            {dim.name}
+                                          </option>
+                                        ))
+                                      )}
                                     </select>
                                   </div>
 

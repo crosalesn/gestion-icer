@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -9,8 +9,11 @@ import { UserRole } from '../../domain/value-objects/user-role.enum';
 
 @Entity('users')
 export class UserOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
+  uuid: string;
 
   @Column()
   name: string;
@@ -22,13 +25,13 @@ export class UserOrmEntity {
   passwordHash: string;
 
   @Column({
-    type: 'enum',
-    enum: UserRole,
+    type: 'varchar',
+    length: 50,
     default: UserRole.COLLABORATOR,
   })
   role: UserRole;
 
-  @Column({ name: 'is_active', default: true })
+  @Column({ type: 'bit', name: 'is_active', default: true })
   isActive: boolean;
 
   @CreateDateColumn({ name: 'created_at' })

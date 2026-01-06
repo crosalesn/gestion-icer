@@ -7,6 +7,11 @@ const actionPlansService = {
     return response.data;
   },
 
+  getAll: async () => {
+    const response = await api.get<ActionPlan[]>('/action-plans');
+    return response.data;
+  },
+
   assign: async (collaboratorId: string, data: AssignActionPlanPayload) => {
     const response = await api.post<ActionPlan>(`/action-plans/collaborator/${collaboratorId}`, data);
     return response.data;

@@ -26,6 +26,10 @@ export class CreateCollaboratorDto {
   @IsNotEmpty()
   teamLeader: string;
 
+  @IsString()
+  @IsNotEmpty()
+  clientId: string;
+
   toCommand(): CreateCollaboratorCommand {
     return new CreateCollaboratorCommand(
       this.name,
@@ -34,6 +38,7 @@ export class CreateCollaboratorDto {
       this.project,
       this.role,
       this.teamLeader,
+      this.clientId,
     );
   }
 }

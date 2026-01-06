@@ -20,13 +20,13 @@ export class PostgresEvaluationRepository implements IEvaluationRepository {
   }
 
   async findById(id: string): Promise<Evaluation | null> {
-    const ormEntity = await this.repository.findOne({ where: { id } });
+    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
     return ormEntity ? EvaluationMapper.toDomain(ormEntity) : null;
   }
 
   async findByCollaboratorId(collaboratorId: string): Promise<Evaluation[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId },
+      where: { collaboratorId: Number(collaboratorId) },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationMapper.toDomain(orm));
@@ -37,7 +37,7 @@ export class PostgresEvaluationRepository implements IEvaluationRepository {
     type: EvaluationType,
   ): Promise<Evaluation | null> {
     const ormEntity = await this.repository.findOne({
-      where: { collaboratorId, type },
+      where: { collaboratorId: Number(collaboratorId), type },
     });
     return ormEntity ? EvaluationMapper.toDomain(ormEntity) : null;
   }

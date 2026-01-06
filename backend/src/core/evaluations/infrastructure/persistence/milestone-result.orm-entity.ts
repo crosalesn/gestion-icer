@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -10,46 +10,46 @@ import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-leve
 
 @Entity('milestone_results')
 export class MilestoneResultOrmEntity {
-  @PrimaryColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'collaborator_id', type: 'uuid' })
-  collaboratorId: string;
+  @Column({ name: 'collaborator_id', type: 'int' })
+  collaboratorId: number;
 
   @Column({
-    type: 'enum',
-    enum: EvaluationMilestone,
+    type: 'varchar',
+    length: 50,
   })
   milestone: EvaluationMilestone;
 
   @Column({
     name: 'collaborator_assignment_id',
-    type: 'uuid',
+    type: 'int',
     nullable: true,
   })
-  collaboratorAssignmentId: string | null;
+  collaboratorAssignmentId: number | null;
 
   @Column({
     name: 'team_leader_assignment_id',
-    type: 'uuid',
+    type: 'int',
     nullable: true,
   })
-  teamLeaderAssignmentId: string | null;
+  teamLeaderAssignmentId: number | null;
 
   @Column({ name: 'final_score', type: 'float' })
   finalScore: number;
 
   @Column({
-    type: 'enum',
-    enum: RiskLevel,
+    type: 'varchar',
+    length: 50,
     name: 'risk_level',
   })
   riskLevel: RiskLevel;
 
-  @Column({ name: 'calculated_at', type: 'timestamp' })
+  @Column({ name: 'calculated_at', type: 'datetime2' })
   calculatedAt: Date;
 
-  @Column({ name: 'calculation_formula', type: 'text' })
+  @Column({ name: 'calculation_formula', type: 'nvarchar', length: 'MAX' })
   calculationFormula: string;
 
   @CreateDateColumn({ name: 'created_at' })

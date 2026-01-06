@@ -36,9 +36,16 @@ export class CreateCollaboratorUseCase {
       command.project,
       command.role,
       command.teamLeader,
+      command.clientId,
     );
 
     await this.collaboratorRepository.save(collaborator);
+
+    // Refetch to get the internal ID (populated by DB after insert)
+    const savedCollaborator = await this.collaboratorRepository.findById(id);
+    if (!savedCollaborator) {
+      throw new Error('Failed to retrieve saved collaborator');
+    }
 
     // Auto-assign Day 1 Evaluation
     try {
@@ -54,6 +61,6 @@ export class CreateCollaboratorUseCase {
       );
     }
 
-    return collaborator;
+    return savedCollaborator;
   }
 }

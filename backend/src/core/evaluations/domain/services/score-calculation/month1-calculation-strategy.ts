@@ -1,42 +1,66 @@
 import { EvaluationMilestone } from '../../value-objects/evaluation-milestone.enum';
-import { EvaluationAssignment } from '../../entities/evaluation-assignment.entity';
+import { TargetRole } from '../../value-objects/target-role.enum';
+import { RiskLevel } from '../../../../collaborators/domain/value-objects/risk-level.enum';
 import {
   ICalculationStrategy,
   CalculationResult,
+  AssignmentWithRole,
 } from './calculation-strategy.interface';
 
 export class Month1CalculationStrategy implements ICalculationStrategy {
   readonly milestone = EvaluationMilestone.MONTH_1;
 
-  canCalculate(assignments: EvaluationAssignment[]): boolean {
-    // Simplified: Only need ONE assignment for Month 1
-    const assignment = assignments.find(
-      (a) => a.milestone === EvaluationMilestone.MONTH_1 && a.score !== null
+  canCalculate(assignments: AssignmentWithRole[]): boolean {
+    // We need both Collaborator and Team Leader assignments to be scored
+    const collaboratorAssignment = assignments.find(
+      (a) => a.role === TargetRole.COLLABORATOR,
     );
-    return assignment !== undefined;
+    const teamLeaderAssignment = assignments.find(
+      (a) => a.role === TargetRole.TEAM_LEADER,
+    );
+
+    return (
+      collaboratorAssignment !== undefined &&
+      collaboratorAssignment.assignment.score !== null &&
+      teamLeaderAssignment !== undefined &&
+      teamLeaderAssignment.assignment.score !== null
+    );
   }
 
-  calculate(assignments: EvaluationAssignment[]): CalculationResult {
+  calculate(assignments: AssignmentWithRole[]): CalculationResult {
     if (!this.canCalculate(assignments)) {
-      throw new Error('Cannot calculate Month 1 result: missing evaluation');
+      throw new Error('Cannot calculate Month 1 result: missing required scored evaluations');
     }
 
-    const assignment = assignments.find(
-      (a) => a.milestone === EvaluationMilestone.MONTH_1 && a.score !== null
-    );
+    const collaboratorAssignment = assignments.find(
+      (a) => a.role === TargetRole.COLLABORATOR,
+    )!;
+    const teamLeaderAssignment = assignments.find(
+      (a) => a.role === TargetRole.TEAM_LEADER,
+    )!;
 
-    if (!assignment || assignment.score === null) {
-      throw new Error('Assignment not found or score is null');
+    const colScore = collaboratorAssignment.assignment.score!;
+    const tlScore = teamLeaderAssignment.assignment.score!;
+
+    // Formula: (ICER Col * 0.4) + (ICER TL * 0.6)
+    const finalScoreRaw = colScore * 0.4 + tlScore * 0.6;
+    const finalScore = Math.round(finalScoreRaw * 10) / 10; // Round to 1 decimal
+    const formula = `(${colScore.toFixed(1)} * 0.4) + (${tlScore.toFixed(1)} * 0.6) = ${finalScore.toFixed(2)}`;
+
+    // Determine Risk Level based on final score
+    let riskLevel = RiskLevel.NONE;
+    if (finalScore >= 1.0 && finalScore <= 1.9) {
+      riskLevel = RiskLevel.HIGH;
+    } else if (finalScore >= 2.0 && finalScore <= 2.9) {
+      riskLevel = RiskLevel.MEDIUM;
+    } else if (finalScore >= 3.0) {
+      riskLevel = RiskLevel.LOW;
     }
-
-    // Simplified formula: Direct average (no weighting needed with single evaluation)
-    const finalScore = assignment.score;
-    const formula = `Average(Evaluación) = ${finalScore.toFixed(2)}`;
 
     return {
-      finalScore: Math.round(finalScore * 10) / 10, // Round to 1 decimal
+      finalScore: finalScore,
       calculationFormula: formula,
+      determinedRiskLevel: riskLevel, // New field in CalculationResult
     };
   }
 }
-

@@ -19,7 +19,7 @@ export class PostgresUserRepository implements IUserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const ormEntity = await this.repository.findOne({ where: { id } });
+    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
     return ormEntity ? UserMapper.toDomain(ormEntity) : null;
   }
 

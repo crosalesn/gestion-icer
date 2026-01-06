@@ -10,11 +10,14 @@ import { PostgresCollaboratorRepository } from './infrastructure/persistence/col
 import { CollaboratorOrmEntity } from './infrastructure/persistence/collaborator.orm-entity';
 import { EvaluationsModule } from '../evaluations/evaluations.module';
 import { MilestoneResultOrmEntity } from '../evaluations/infrastructure/persistence/milestone-result.orm-entity';
+import { ClientsModule } from '../clients/clients.module';
+import { ClientOrmEntity } from '../clients/infrastructure/persistence/client.orm-entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CollaboratorOrmEntity, MilestoneResultOrmEntity]), // Register both entities
+    TypeOrmModule.forFeature([CollaboratorOrmEntity, MilestoneResultOrmEntity, ClientOrmEntity]), // Register entities
     forwardRef(() => EvaluationsModule), // Use forwardRef to avoid circular dependency
+    ClientsModule,
   ],
   controllers: [CollaboratorController],
   providers: [
