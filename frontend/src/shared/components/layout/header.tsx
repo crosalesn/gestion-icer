@@ -4,7 +4,6 @@ import type { AppDispatch, RootState } from '../../../app/store';
 import { logoutUser } from '../../../features/auth/store/auth-slice';
 import { Menu, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { clsx } from 'clsx';
 
 interface HeaderProps {
   toggleSidebar: () => void;

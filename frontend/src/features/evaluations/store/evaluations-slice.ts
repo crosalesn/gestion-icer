@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import evaluationsService from '../services/evaluations-service';
-import type { PendingEvaluationResponse, EvaluationAssignment } from '../types/template.types';
+import type { PendingEvaluationResponse } from '../types/template.types';
 
 interface EvaluationsState {
   pendingEvaluations: PendingEvaluationResponse[];
