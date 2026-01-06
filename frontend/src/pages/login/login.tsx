@@ -7,6 +7,20 @@ import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import loginBackground from '../../assets/witi-background.svg';
 
+// Global variable injected by Vite at build time
+declare const __BUILD_DATE__: string;
+
+const formatBuildDate = (isoDate: string) => {
+  const date = new Date(isoDate);
+  return date.toLocaleDateString('es-ES', { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -90,6 +104,13 @@ const Login = () => {
             Ingresar
           </Button>
         </form>
+        
+        {/* Build date info */}
+        <div className="text-center mt-4">
+          <p className="text-xs text-gray-300/70">
+            Build: {formatBuildDate(__BUILD_DATE__)}
+          </p>
+        </div>
       </div>
     </div>
   );
