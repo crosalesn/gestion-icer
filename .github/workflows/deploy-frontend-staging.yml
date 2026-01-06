@@ -9,7 +9,7 @@ on:
       - '.github/workflows/deploy-frontend-staging.yml'
 
 env:
-  NODE_VERSION: '18.x'
+  NODE_VERSION: '24.x'
 
 jobs:
   build-and-deploy:
