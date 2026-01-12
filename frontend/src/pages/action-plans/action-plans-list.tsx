@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Target, Calendar, User, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
 import actionPlansService from '../../features/action-plans/services/action-plans-service';
+import { formatDate } from '../../shared/utils/date-utils';
 import collaboratorsService from '../../features/collaborators/services/collaborators-service';
 import type { ActionPlan } from '../../features/action-plans/types/action-plan.types';
 import type { Collaborator } from '../../features/collaborators/types/collaborator.types';
@@ -108,11 +108,11 @@ const ActionPlansList = () => {
                         </div>
                          <div className="flex items-center gap-2">
                           <Clock size={16} className="text-gray-400" />
-                          <span>Asignado: {plan.createdAt ? format(parseISO(plan.createdAt), 'dd/MM/yyyy') : '-'}</span>
+                          <span>Asignado: {formatDate(plan.createdAt)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-brand-primary font-medium">
                           <Calendar size={16} />
-                          <span>Vence: {plan.dueDate ? format(parseISO(plan.dueDate), 'dd/MM/yyyy') : '-'}</span>
+                          <span>Vence: {formatDate(plan.dueDate)}</span>
                         </div>
                       </div>
                     </div>

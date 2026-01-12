@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { format, parseISO, differenceInDays } from 'date-fns';
 import reportsService from '../../features/reports/services/reports-service';
 import evaluationsService from '../../features/evaluations/services/evaluations-service';
 import type { CollaboratorHistory, Evaluation } from '../../features/reports/types/report.types';
@@ -9,6 +8,7 @@ import type { MilestoneResult } from '../../features/evaluations/types/milestone
 import type { CompletedAssignmentResponse } from '../../features/evaluations/types/template.types';
 import { EvaluationMilestone } from '../../features/evaluations/types/template.types';
 import Button from '../../shared/components/ui/button';
+import { formatDate, getDaysFromDate } from '../../shared/utils/date-utils';
 import MilestoneResults from '../evaluations/milestone-results';
 import CompletedEvaluations from '../evaluations/completed-evaluations';
 import { ArrowLeft, Target, Calendar, AlertCircle, CheckCircle, BarChart2, ListTodo, Clock } from 'lucide-react';
@@ -87,14 +87,6 @@ const CollaboratorDetail = () => {
     }
   };
 
-  const getDaysActive = (dateStr: string) => {
-    try {
-      if (!dateStr) return 0;
-      return differenceInDays(new Date(), parseISO(dateStr));
-    } catch {
-      return 0;
-    }
-  };
 
   if (loading) return <div className="p-8 text-center">Cargando ficha del colaborador...</div>;
   if (!history) return <div className="p-8 text-center">Colaborador no encontrado</div>;
@@ -144,7 +136,7 @@ const CollaboratorDetail = () => {
                   </p>
                   <p className="text-xs text-gray-500">
                     {evalItem.status === 'COMPLETED' && evalItem.completedAt ? 
-                      `Completado el ${format(parseISO(evalItem.completedAt), 'dd/MM/yyyy')}` : 
+                      `Completado el ${formatDate(evalItem.completedAt)}` : 
                       'Pendiente'}
                   </p>
                 </div>
@@ -220,10 +212,10 @@ const CollaboratorDetail = () => {
                          <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Tiempo en proceso</label>
                          <p className="text-gray-900 flex items-center gap-2 font-medium">
                             <Clock size={16} className="text-gray-400"/>
-                            {getDaysActive(collaborator.admissionDate)} días
+                            {getDaysFromDate(collaborator.admissionDate)} días
                          </p>
                          <p className="text-xs text-gray-500 mt-1 ml-6">
-                           Ingreso: {format(parseISO(collaborator.admissionDate), 'dd/MM/yyyy')}
+                           Ingreso: {formatDate(collaborator.admissionDate)}
                          </p>
                     </div>
                     
@@ -249,7 +241,7 @@ const CollaboratorDetail = () => {
                               
                               <div className="mt-3 flex items-center gap-2 text-xs text-blue-500 font-medium bg-blue-100/50 p-1.5 rounded">
                                 <Calendar size={12} />
-                                Vence: {format(parseISO(activeActionPlan.dueDate), 'dd/MM/yyyy')}
+                                Vence: {formatDate(activeActionPlan.dueDate)}
                               </div>
                               
                               <Button 

@@ -1,8 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import usersService from '../../features/users/services/users-service';
+import { formatDate } from '../../shared/utils/date-utils';
 import type { User } from '../../features/users/types/user.types';
 import { UserRole } from '../../features/users/types/user.types';
 import Button from '../../shared/components/ui/button';
@@ -364,14 +363,7 @@ const UsersList = () => {
                           {getStatusBadge(user?.isActive !== undefined ? user.isActive : true)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {user?.createdAt ? (() => {
-                            try {
-                              return format(parseISO(user.createdAt), 'dd/MM/yyyy', { locale: es });
-                            } catch (e) {
-                              console.error('Error parsing date:', user.createdAt, e);
-                              return user.createdAt;
-                            }
-                          })() : '-'}
+                          {formatDate(user?.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button 

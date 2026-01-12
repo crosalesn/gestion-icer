@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, parseISO, differenceInDays } from 'date-fns';
 import toast from 'react-hot-toast';
 import collaboratorsService from '../../features/collaborators/services/collaborators-service';
 import type { Collaborator } from '../../features/collaborators/types/collaborator.types';
 import Button from '../../shared/components/ui/button';
+import { formatDate, getDaysFromDate, parseDate } from '../../shared/utils/date-utils';
 import { Plus, Search, AlertTriangle, CheckCircle, ChevronUp, ChevronDown, ChevronsUpDown, Eye, Trash2, Edit, Clock, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import CreateCollaboratorModal from './components/create-collaborator-modal';
@@ -107,14 +107,8 @@ const CollaboratorsList = () => {
           bValue = b.name?.toLowerCase() || '';
           break;
         case 'admissionDate':
-          try {
-            aValue = a.admissionDate ? parseISO(a.admissionDate).getTime() : 0;
-            bValue = b.admissionDate ? parseISO(b.admissionDate).getTime() : 0;
-          } catch (e) {
-            console.error('Error parsing dates for sorting:', e);
-            aValue = 0;
-            bValue = 0;
-          }
+          aValue = a.admissionDate ? parseDate(a.admissionDate).getTime() : 0;
+          bValue = b.admissionDate ? parseDate(b.admissionDate).getTime() : 0;
           break;
         case 'status':
           aValue = a.status || '';
@@ -217,14 +211,6 @@ const CollaboratorsList = () => {
     }
   };
 
-  const getDaysActive = (dateStr: string) => {
-    try {
-      if (!dateStr) return 0;
-      return differenceInDays(new Date(), parseISO(dateStr));
-    } catch {
-      return 0;
-    }
-  };
 
   const getNextAction = (collab: Collaborator) => {
     if (collab.riskLevel === 'HIGH') {
@@ -427,7 +413,7 @@ const CollaboratorsList = () => {
                     return paginatedCollaborators.map((collab, index) => {
                       if (!collab) return null;
                       
-                      const daysActive = getDaysActive(collab.admissionDate);
+                      const daysActive = getDaysFromDate(collab.admissionDate);
                       const nextAction = getNextAction(collab);
                       
                       return (
@@ -444,13 +430,7 @@ const CollaboratorsList = () => {
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
                           <span className="text-sm text-gray-900">
-                            {collab?.admissionDate ? (() => {
-                              try {
-                                return format(parseISO(collab.admissionDate), 'dd/MM/yyyy');
-                              } catch (e) {
-                                return '-';
-                              }
-                            })() : '-'}
+                            {formatDate(collab?.admissionDate)}
                           </span>
                           <span className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                             <Clock size={10} />

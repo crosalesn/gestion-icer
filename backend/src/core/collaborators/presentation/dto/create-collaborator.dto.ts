@@ -1,5 +1,6 @@
 import { IsDateString, IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { CreateCollaboratorCommand } from '../../application/commands/create-collaborator.command';
+import { parseDateOnly } from '../../../../common/utils/date.utils';
 
 export class CreateCollaboratorDto {
   @IsString()
@@ -34,7 +35,7 @@ export class CreateCollaboratorDto {
     return new CreateCollaboratorCommand(
       this.name,
       this.email,
-      new Date(this.admissionDate),
+      parseDateOnly(this.admissionDate),
       this.project,
       this.role,
       this.teamLeader,

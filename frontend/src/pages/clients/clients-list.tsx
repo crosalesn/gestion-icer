@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import { formatDate } from '../../shared/utils/date-utils';
 import clientsService from '../../features/clients/services/clients-service';
 import type { Client, CreateClientPayload } from '../../features/clients/types/client.types';
 import Button from '../../shared/components/ui/button';
@@ -307,14 +306,6 @@ const ClientsList = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
-    try {
-      return format(parseISO(dateString), 'dd/MM/yyyy', { locale: es });
-    } catch {
-      return dateString;
-    }
-  };
 
   return (
     <div className="space-y-6">

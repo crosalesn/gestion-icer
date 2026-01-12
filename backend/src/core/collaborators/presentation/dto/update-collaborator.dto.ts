@@ -1,5 +1,6 @@
 import { IsString, IsEmail, IsDateString, IsNotEmpty } from 'class-validator';
 import { UpdateCollaboratorCommand } from '../../application/commands/update-collaborator.command';
+import { parseDateOnly } from '../../../../common/utils/date.utils';
 
 export class UpdateCollaboratorDto {
   @IsString()
@@ -35,7 +36,7 @@ export class UpdateCollaboratorDto {
       id,
       this.name,
       this.email,
-      new Date(this.admissionDate),
+      parseDateOnly(this.admissionDate),
       this.project,
       this.role,
       this.teamLeader,

@@ -19,15 +19,17 @@ async function bootstrap() {
   // CORS
   app.enableCors();
 
-  // Swagger Configuration
-  const config = new DocumentBuilder()
-    .setTitle('Gestion ICER API')
-    .setDescription('API para la gestión de fichas ICER')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  // Swagger Configuration (disabled in production)
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Gestion ICER API')
+      .setDescription('API para la gestión de fichas ICER')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }

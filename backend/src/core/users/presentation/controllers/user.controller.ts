@@ -42,6 +42,7 @@ export class UserController {
   }
 
   @Post('seed')
+  @UseGuards(JwtAuthGuard)
   async createTestUser() {
     try {
       const command = new CreateUserCommand(

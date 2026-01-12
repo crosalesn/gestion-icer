@@ -1,4 +1,5 @@
 import { Collaborator } from '../../domain/entities/collaborator.entity';
+import { formatDateOnly } from '../../../../common/utils/date.utils';
 
 export class CollaboratorResponseDto {
   id: string;
@@ -19,7 +20,8 @@ export class CollaboratorResponseDto {
     dto.id = domain.id;
     dto.name = domain.name;
     dto.email = domain.email;
-    dto.admissionDate = domain.admissionDate.toISOString();
+    // Solo fecha (YYYY-MM-DD) usando métodos locales para evitar problemas de TZ
+    dto.admissionDate = formatDateOnly(domain.admissionDate);
     dto.project = domain.project;
     dto.role = domain.role;
     dto.teamLeader = domain.teamLeader;
