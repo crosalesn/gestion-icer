@@ -5,6 +5,7 @@ import type { IEvaluationAssignmentRepository } from '../../../evaluations/domai
 import type { IActionPlanRepository } from '../../../action-plans/domain/repositories/action-plan.repository.interface';
 import { EvaluationMilestone } from '../../../evaluations/domain/value-objects/evaluation-milestone.enum';
 import { EvaluationType } from '../../../evaluations/domain/value-objects/evaluation-type.enum';
+import { formatDateOnly } from '../../../../common/utils/date.utils';
 
 export interface CollaboratorHistoryReport {
   collaborator: {
@@ -12,7 +13,7 @@ export interface CollaboratorHistoryReport {
     name: string;
     role: string;
     project: string;
-    admissionDate: Date;
+    admissionDate: string;
     riskLevel: string;
     status: string;
   };
@@ -21,13 +22,13 @@ export interface CollaboratorHistoryReport {
     type: string;
     score: number | null;
     status: string;
-    date: Date;
+    date: string;
   }[];
   activeActionPlan: {
     id: string;
     type: string;
     description: string;
-    dueDate: Date;
+    dueDate: string;
   } | null;
 }
 
@@ -73,7 +74,7 @@ export class GetCollaboratorHistoryUseCase {
       type: this.mapMilestoneToType(a.milestone),
       score: a.score,
       status: a.status,
-      date: a.completedAt || a.createdAt,
+      date: formatDateOnly(a.completedAt || a.createdAt),
     }));
 
     const allEvaluations = [
@@ -82,7 +83,7 @@ export class GetCollaboratorHistoryUseCase {
         type: e.type,
         score: e.score,
         status: e.status,
-        date: e.completedAt || e.createdAt,
+        date: formatDateOnly(e.completedAt || e.createdAt),
       })),
       ...mappedAssignments,
     ];
@@ -97,7 +98,7 @@ export class GetCollaboratorHistoryUseCase {
         name: collaborator.name,
         role: collaborator.role,
         project: collaborator.project,
-        admissionDate: collaborator.admissionDate,
+        admissionDate: formatDateOnly(collaborator.admissionDate),
         riskLevel: collaborator.riskLevel,
         status: collaborator.status,
       },
@@ -107,7 +108,7 @@ export class GetCollaboratorHistoryUseCase {
             id: activePlan.id,
             type: activePlan.type,
             description: activePlan.description,
-            dueDate: activePlan.dueDate,
+            dueDate: formatDateOnly(activePlan.dueDate),
           }
         : null,
     };

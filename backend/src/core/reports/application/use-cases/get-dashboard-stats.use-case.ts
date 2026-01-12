@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ICollaboratorRepository } from '../../../collaborators/domain/repositories/collaborator.repository.interface';
 import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-level.enum';
+import { formatDateOnly } from '../../../../common/utils/date.utils';
 
 export interface DashboardStats {
   totalCollaborators: number;
@@ -43,7 +44,7 @@ export class GetDashboardStatsUseCase {
             name: c.name,
             project: c.project,
             riskLevel: c.riskLevel,
-            admissionDate: c.admissionDate,
+            admissionDate: formatDateOnly(c.admissionDate),
           });
           break;
         case RiskLevel.MEDIUM:

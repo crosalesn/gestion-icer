@@ -9,6 +9,7 @@ import { CreateCollaboratorDto } from '../dto/create-collaborator.dto';
 import { UpdateCollaboratorDto } from '../dto/update-collaborator.dto';
 import { DeleteCollaboratorCommand } from '../../application/commands/delete-collaborator.command';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { formatDateOnly } from '../../../../common/utils/date.utils';
 
 @ApiTags('Collaborators')
 @ApiBearerAuth()
@@ -30,7 +31,7 @@ export class CollaboratorController {
       id: String(result.id),
       name: String(result.name),
       email: String(result.email),
-      admissionDate: result.admissionDate.toISOString(),
+      admissionDate: formatDateOnly(result.admissionDate),
       project: String(result.project),
       role: String(result.role),
       teamLeader: String(result.teamLeader),
@@ -50,7 +51,7 @@ export class CollaboratorController {
       id: String(c.id),
       name: String(c.name),
       email: String(c.email),
-      admissionDate: c.admissionDate.toISOString(),
+      admissionDate: formatDateOnly(c.admissionDate),
       project: String(c.project),
       role: String(c.role),
       teamLeader: String(c.teamLeader),
@@ -69,7 +70,7 @@ export class CollaboratorController {
       id: String(result.id),
       name: String(result.name),
       email: String(result.email),
-      admissionDate: result.admissionDate.toISOString(),
+      admissionDate: formatDateOnly(result.admissionDate),
       project: String(result.project),
       role: String(result.role),
       teamLeader: String(result.teamLeader),
@@ -88,7 +89,7 @@ export class CollaboratorController {
       id: String(result.id),
       name: String(result.name),
       email: String(result.email),
-      admissionDate: result.admissionDate.toISOString(),
+      admissionDate: formatDateOnly(result.admissionDate),
       project: String(result.project),
       role: String(result.role),
       teamLeader: String(result.teamLeader),
