@@ -217,7 +217,7 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
           </label>
           <DatePicker
             selected={admissionDate}
-            onChange={(date) => setAdmissionDate(date)}
+            onChange={(date: Date | null) => setAdmissionDate(date)}
             dateFormat="dd/MM/yyyy"
             locale="es"
             placeholderText="dd/mm/aaaa"

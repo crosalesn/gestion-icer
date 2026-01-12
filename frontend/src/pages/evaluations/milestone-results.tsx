@@ -142,7 +142,7 @@ const MilestoneResults = ({ results, loading }: MilestoneResultsProps) => {
                   borderRadius: '8px',
                   padding: '8px 12px'
                 }}
-                formatter={(value: number) => [value.toFixed(2), 'Puntaje']}
+                formatter={(value: number | undefined) => [value !== undefined ? value.toFixed(2) : '0', 'Puntaje']}
               />
               {/* Reference lines for risk levels */}
               <ReferenceLine y={2} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Riesgo Alto', position: 'right', fill: '#ef4444', fontSize: 10 }} />

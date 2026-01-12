@@ -235,7 +235,7 @@ const CreateCollaboratorModal = ({ isOpen, onClose, onSuccess }: CreateCollabora
           </label>
           <DatePicker
             selected={admissionDate}
-            onChange={(date) => setAdmissionDate(date)}
+            onChange={(date: Date | null) => setAdmissionDate(date)}
             dateFormat="dd/MM/yyyy"
             locale="es"
             placeholderText="dd/mm/aaaa"
