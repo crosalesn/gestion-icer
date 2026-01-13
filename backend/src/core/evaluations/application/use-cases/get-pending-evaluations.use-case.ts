@@ -36,7 +36,8 @@ export class GetPendingEvaluationsUseCase {
 
     for (const assignment of pendingAssignments) {
       const template = await this.templateRepository.findById(assignment.templateId);
-      const collaborator = await this.collaboratorRepository.findById(assignment.collaboratorId);
+      // collaboratorId is the internal numeric ID, so use findByInternalId
+      const collaborator = await this.collaboratorRepository.findByInternalId(assignment.collaboratorId);
       
       if (template && collaborator) {
         results.push(

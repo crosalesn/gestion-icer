@@ -44,7 +44,7 @@ export class EvaluationAssignmentOrmEntity {
   @Column({ name: 'completed_at', type: 'datetime2', nullable: true })
   completedAt: Date | null;
 
-  @Column('nvarchar', { length: 'MAX', default: '[]' })
+  @Column('simple-json', { default: '[]' })
   answers: Array<{ questionId: string; value: number | string }>;
 
   @Column('float', { nullable: true })
