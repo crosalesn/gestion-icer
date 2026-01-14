@@ -15,7 +15,11 @@ import { ClientOrmEntity } from '../clients/infrastructure/persistence/client.or
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CollaboratorOrmEntity, MilestoneResultOrmEntity, ClientOrmEntity]), // Register entities
+    TypeOrmModule.forFeature([
+      CollaboratorOrmEntity,
+      MilestoneResultOrmEntity,
+      ClientOrmEntity,
+    ]), // Register entities
     forwardRef(() => EvaluationsModule), // Use forwardRef to avoid circular dependency
     ClientsModule,
   ],
@@ -34,4 +38,3 @@ import { ClientOrmEntity } from '../clients/infrastructure/persistence/client.or
   exports: ['ICollaboratorRepository'], // Export if other modules need it
 })
 export class CollaboratorsModule {}
-

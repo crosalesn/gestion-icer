@@ -7,7 +7,7 @@ const dimensionsService = {
     return response.data;
   },
 
-  getById: async (id: string): Promise<Dimension> => {
+  getById: async (id: number | string): Promise<Dimension> => {
     const response = await api.get<Dimension>(`/dimensions/${id}`);
     return response.data;
   },
@@ -17,12 +17,12 @@ const dimensionsService = {
     return response.data;
   },
 
-  update: async (id: string, payload: UpdateDimensionPayload): Promise<Dimension> => {
+  update: async (id: number | string, payload: UpdateDimensionPayload): Promise<Dimension> => {
     const response = await api.put<Dimension>(`/dimensions/${id}`, payload);
     return response.data;
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number | string): Promise<void> => {
     await api.delete(`/dimensions/${id}`);
   },
 };

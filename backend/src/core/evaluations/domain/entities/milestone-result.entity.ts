@@ -3,11 +3,11 @@ import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-leve
 
 export class MilestoneResult {
   constructor(
-    private readonly _id: string,
-    private readonly _collaboratorId: string,
+    private _id: number | null,
+    private readonly _collaboratorId: number,
     private readonly _milestone: EvaluationMilestone,
-    private readonly _collaboratorAssignmentId: string | null,
-    private readonly _teamLeaderAssignmentId: string | null,
+    private readonly _collaboratorAssignmentId: number | null,
+    private readonly _teamLeaderAssignmentId: number | null,
     private readonly _finalScore: number,
     private readonly _riskLevel: RiskLevel,
     private readonly _calculatedAt: Date,
@@ -16,11 +16,11 @@ export class MilestoneResult {
     private readonly _updatedAt: Date,
   ) {}
 
-  get id(): string {
+  get id(): number | null {
     return this._id;
   }
 
-  get collaboratorId(): string {
+  get collaboratorId(): number {
     return this._collaboratorId;
   }
 
@@ -28,11 +28,11 @@ export class MilestoneResult {
     return this._milestone;
   }
 
-  get collaboratorAssignmentId(): string | null {
+  get collaboratorAssignmentId(): number | null {
     return this._collaboratorAssignmentId;
   }
 
-  get teamLeaderAssignmentId(): string | null {
+  get teamLeaderAssignmentId(): number | null {
     return this._teamLeaderAssignmentId;
   }
 
@@ -61,18 +61,17 @@ export class MilestoneResult {
   }
 
   static create(
-    id: string,
-    collaboratorId: string,
+    collaboratorId: number,
     milestone: EvaluationMilestone,
-    collaboratorAssignmentId: string | null,
-    teamLeaderAssignmentId: string | null,
+    collaboratorAssignmentId: number | null,
+    teamLeaderAssignmentId: number | null,
     finalScore: number,
     riskLevel: RiskLevel,
     calculationFormula: string,
   ): MilestoneResult {
     const now = new Date();
     return new MilestoneResult(
-      id,
+      null,
       collaboratorId,
       milestone,
       collaboratorAssignmentId,
@@ -87,11 +86,11 @@ export class MilestoneResult {
   }
 
   static reconstitute(
-    id: string,
-    collaboratorId: string,
+    id: number,
+    collaboratorId: number,
     milestone: EvaluationMilestone,
-    collaboratorAssignmentId: string | null,
-    teamLeaderAssignmentId: string | null,
+    collaboratorAssignmentId: number | null,
+    teamLeaderAssignmentId: number | null,
     finalScore: number,
     riskLevel: RiskLevel,
     calculatedAt: Date,
@@ -114,4 +113,3 @@ export class MilestoneResult {
     );
   }
 }
-

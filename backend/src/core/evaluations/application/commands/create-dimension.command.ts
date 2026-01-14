@@ -7,4 +7,3 @@ export class CreateDimensionCommand {
     public readonly isActive: boolean = true,
   ) {}
 }
-

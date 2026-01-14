@@ -2,7 +2,7 @@ import { UserRole } from '../value-objects/user-role.enum';
 
 export class User {
   constructor(
-    private readonly _id: string,
+    private _id: number | null, // null for new entities, assigned by DB after save
     private _name: string,
     private _email: string,
     private _passwordHash: string,
@@ -12,7 +12,7 @@ export class User {
     private _updatedAt: Date,
   ) {}
 
-  get id(): string {
+  get id(): number | null {
     return this._id;
   }
 
@@ -44,16 +44,15 @@ export class User {
     return this._updatedAt;
   }
 
-  // Factory method for creating a new user
+  // Factory method for creating a new user (id will be assigned by DB)
   static create(
-    id: string,
     name: string,
     email: string,
     passwordHash: string,
     role: UserRole,
   ): User {
     return new User(
-      id,
+      null, // id is null for new entities
       name,
       email,
       passwordHash,
@@ -66,7 +65,7 @@ export class User {
 
   // Method to reconstruct user from persistence
   static reconstitute(
-    id: string,
+    id: number,
     name: string,
     email: string,
     passwordHash: string,
@@ -87,4 +86,3 @@ export class User {
     );
   }
 }
-

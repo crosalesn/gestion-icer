@@ -4,4 +4,3 @@ export enum CollaboratorStatus {
   PENDING_MONTH_1 = 'PENDING_MONTH_1',
   FINISHED = 'FINISHED',
 }
-

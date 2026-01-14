@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../app/store';
 import { fetchPendingEvaluations, submitEvaluation } from '../../features/evaluations/store/evaluations-slice';
 import type { PendingEvaluationResponse, EvaluationAnswer } from '../../features/evaluations/types/template.types';
@@ -20,15 +21,35 @@ import {
 
 const MyEvaluations = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const location = useLocation();
   const { pendingEvaluations, loading, error, submitting, submitError } = useSelector(
     (state: RootState) => state.evaluations
   );
   const [selectedEvaluation, setSelectedEvaluation] = useState<PendingEvaluationResponse | null>(null);
-  const [isExpanded, setIsExpanded] = useState<Record<string, boolean>>({});
+  const [isExpanded, setIsExpanded] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     dispatch(fetchPendingEvaluations());
   }, [dispatch]);
+
+  // Auto-expand evaluation if navigated with openAssignmentId
+  useEffect(() => {
+    const state = location.state as { openAssignmentId?: number } | null;
+    if (state?.openAssignmentId && pendingEvaluations.length > 0) {
+      const evaluationToOpen = pendingEvaluations.find(
+        (e) => e.assignment?.id === state.openAssignmentId
+      );
+      if (evaluationToOpen) {
+        setSelectedEvaluation(evaluationToOpen);
+        setIsExpanded((prev) => ({
+          ...prev,
+          [state.openAssignmentId!]: true,
+        }));
+        // Clear the state to prevent re-opening on subsequent renders
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, pendingEvaluations]);
 
   const handleStartEvaluation = (evaluation: PendingEvaluationResponse) => {
     const assignmentId = evaluation.assignment?.id;

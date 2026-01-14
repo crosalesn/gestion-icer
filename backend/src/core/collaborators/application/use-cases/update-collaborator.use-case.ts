@@ -22,7 +22,8 @@ export class UpdateCollaboratorUseCase {
 
     // Check if email is being changed and if it already exists
     if (command.email !== collaborator.email) {
-      const existingCollaborator = await this.collaboratorRepository.findByEmail(command.email);
+      const existingCollaborator =
+        await this.collaboratorRepository.findByEmail(command.email);
       if (existingCollaborator) {
         throw new Error('Collaborator with this email already exists');
       }
@@ -30,8 +31,7 @@ export class UpdateCollaboratorUseCase {
 
     // Reconstitute with updated values
     const updatedCollaborator = Collaborator.reconstitute(
-      collaborator.id,
-      collaborator.internalId!, // Keep the same internal ID
+      collaborator.id!,
       command.name,
       command.email,
       command.admissionDate,
@@ -42,13 +42,13 @@ export class UpdateCollaboratorUseCase {
       collaborator.status,
       collaborator.riskLevel,
       collaborator.createdAt,
-      new Date(), // updatedAt
+      new Date(),
     );
 
-    await this.collaboratorRepository.save(updatedCollaborator);
+    const savedCollaborator =
+      await this.collaboratorRepository.save(updatedCollaborator);
 
     this.logger.log(`Collaborator ${command.id} updated successfully`);
-    return updatedCollaborator;
+    return savedCollaborator;
   }
 }
-

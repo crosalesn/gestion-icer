@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import type { ICollaboratorRepository } from '../../domain/repositories/collaborator.repository.interface';
 import { Collaborator } from '../../domain/entities/collaborator.entity';
 import { CreateCollaboratorCommand } from '../commands/create-collaborator.command';
@@ -24,12 +23,10 @@ export class CreateCollaboratorUseCase {
       command.email,
     );
     if (existingCollaborator) {
-      throw new Error('Collaborator with this email already exists'); // Should use a custom domain exception
+      throw new Error('Collaborator with this email already exists');
     }
 
-    const id = uuidv4();
     const collaborator = Collaborator.create(
-      id,
       command.name,
       command.email,
       command.admissionDate,
@@ -39,25 +36,24 @@ export class CreateCollaboratorUseCase {
       command.clientId,
     );
 
-    await this.collaboratorRepository.save(collaborator);
-
-    // Refetch to get the internal ID (populated by DB after insert)
-    const savedCollaborator = await this.collaboratorRepository.findById(id);
-    if (!savedCollaborator) {
-      throw new Error('Failed to retrieve saved collaborator');
-    }
+    const savedCollaborator =
+      await this.collaboratorRepository.save(collaborator);
 
     // Auto-assign Day 1 Evaluation
     try {
-      this.logger.log(`Auto-assigning Day 1 evaluation for new collaborator ${id}`);
+      this.logger.log(
+        `Auto-assigning Day 1 evaluation for new collaborator ${savedCollaborator.id}`,
+      );
       const assignCommand = new AssignEvaluationCommand(
-        id,
+        savedCollaborator.id!,
         EvaluationMilestone.DAY_1,
       );
       await this.assignEvaluationUseCase.execute(assignCommand);
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn(
-        `Failed to auto-assign Day 1 evaluation for collaborator ${id}: ${error.message}`,
+        `Failed to auto-assign Day 1 evaluation for collaborator ${savedCollaborator.id}: ${errorMessage}`,
       );
     }
 

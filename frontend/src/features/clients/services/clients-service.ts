@@ -3,7 +3,7 @@ import type { Client, CreateClientPayload, UpdateClientPayload } from '../types/
 
 const normalizeClient = (data: Record<string, unknown>): Client => {
   return {
-    id: (data.id || data._id || '') as string,
+    id: (data.id || data._id || 0) as number,
     name: (data.name || data._name || '') as string,
     createdAt: (data.createdAt || data._createdAt || '') as string,
     updatedAt: (data.updatedAt || data._updatedAt || '') as string,
@@ -21,7 +21,7 @@ const clientsService = {
     return response.data.map(normalizeClient);
   },
 
-  getById: async (id: string): Promise<Client> => {
+  getById: async (id: number): Promise<Client> => {
     const response = await api.get<Record<string, unknown>>(`/clients/${id}`);
     return normalizeClient(response.data);
   },
@@ -31,12 +31,12 @@ const clientsService = {
     return normalizeClient(response.data);
   },
 
-  update: async (id: string, data: UpdateClientPayload): Promise<Client> => {
+  update: async (id: number, data: UpdateClientPayload): Promise<Client> => {
     const response = await api.put<Record<string, unknown>>(`/clients/${id}`, data);
     return normalizeClient(response.data);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     await api.delete(`/clients/${id}`);
   }
 };

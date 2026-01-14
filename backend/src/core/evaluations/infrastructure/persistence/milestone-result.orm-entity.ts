@@ -58,4 +58,3 @@ export class MilestoneResultOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

@@ -30,7 +30,7 @@ export class QuestionResponseDto {
 
 export class TemplateResponseDto {
   @ApiProperty()
-  id: string;
+  id: number | null;
 
   @ApiProperty({ enum: EvaluationMilestone })
   milestone: EvaluationMilestone;
@@ -75,7 +75,6 @@ export class TemplateResponseDto {
       questionDto.order = q.order;
       questionDto.required = q.required;
 
-      // Include dimension info if available
       if (q.dimension) {
         questionDto.dimension = DimensionResponseDto.fromDomain(q.dimension);
       }

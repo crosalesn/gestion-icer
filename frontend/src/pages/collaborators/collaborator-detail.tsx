@@ -96,8 +96,8 @@ const CollaboratorDetail = () => {
   // Group evaluations by milestone for the management tab
   const evaluationsByMilestone = {
     DAY_1: evaluations.filter(e => e.type === 'DAY_1'),
-    WEEK_1: evaluations.filter(e => e.type.includes('WEEK_1')),
-    MONTH_1: evaluations.filter(e => e.type.includes('MONTH_1')),
+    WEEK_1: evaluations.filter(e => e.type === 'WEEK_1'),
+    MONTH_1: evaluations.filter(e => e.type === 'MONTH_1'),
   };
 
   const renderEvaluationCard = (milestoneTitle: string, milestone: EvaluationMilestone, evals: Evaluation[]) => {
@@ -131,8 +131,8 @@ const CollaboratorDetail = () => {
               <div key={evalItem.id} className="flex items-center justify-between bg-gray-50 p-3 rounded border border-gray-100">
                 <div>
                   <p className="text-sm font-medium text-gray-700">
-                    {evalItem.type === 'DAY_1' ? 'Evaluación Colaborador' :
-                     evalItem.type.includes('COLLABORATOR') ? 'Autoevaluación' : 'Evaluación Team Leader'}
+                    {evalItem.type === 'DAY_1' ? 'Evaluación Día 1' :
+                     evalItem.type === 'WEEK_1' ? 'Evaluación Semana 1' : 'Evaluación Mes 1'}
                   </p>
                   <p className="text-xs text-gray-500">
                     {evalItem.status === 'COMPLETED' && evalItem.completedAt ? 
@@ -152,7 +152,7 @@ const CollaboratorDetail = () => {
                   {evalItem.status === 'PENDING' && (
                     <Button 
                       className="text-xs px-2 py-1 h-auto"
-                      onClick={() => navigate(`/evaluaciones/${evalItem.id}`, { state: { evaluation: evalItem } })}
+                      onClick={() => navigate('/evaluaciones', { state: { openAssignmentId: evalItem.id } })}
                     >
                       Evaluar
                     </Button>

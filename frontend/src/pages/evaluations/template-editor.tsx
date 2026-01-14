@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Plus, Trash2, Save, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { clsx } from 'clsx';
+import type { DropResult } from '@hello-pangea/dnd';
+import { ArrowLeft, Plus, Trash2, Save, GripVertical } from 'lucide-react';
 import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import templateService from '../../features/evaluations/services/template-service';
@@ -54,6 +54,37 @@ const TemplateEditor = () => {
     name: 'questions'
   });
 
+  // Group questions by dimension for display (matches evaluation form display)
+  const questionsByDimension = useMemo(() => {
+    const grouped: Record<string, { question: typeof fields[0]; index: number }[]> = {};
+    
+    fields.forEach((field, index) => {
+      const dimId = field.dimensionId || 'sin-dimension';
+      if (!grouped[dimId]) {
+        grouped[dimId] = [];
+      }
+      grouped[dimId].push({ question: field, index });
+    });
+
+    // Sort questions within each dimension by their original order in fields array
+    Object.keys(grouped).forEach((dimId) => {
+      grouped[dimId].sort((a, b) => a.index - b.index);
+    });
+
+    return grouped;
+  }, [fields]);
+
+  // Get sorted dimension IDs (by dimension order)
+  const sortedDimensionIds = useMemo(() => {
+    const dimIds = Object.keys(questionsByDimension);
+    return dimIds.sort((a, b) => {
+      if (a === 'sin-dimension') return 1;
+      if (b === 'sin-dimension') return -1;
+      const dimA = dimensions.find(d => String(d.id) === a);
+      const dimB = dimensions.find(d => String(d.id) === b);
+      return (dimA?.order ?? 999) - (dimB?.order ?? 999);
+    });
+  }, [questionsByDimension, dimensions]);
 
   // Load dimensions from backend
   useEffect(() => {
@@ -72,17 +103,33 @@ const TemplateEditor = () => {
   }, []);
 
   useEffect(() => {
-    if (!isNew && id) {
+    // Wait for dimensions to be loaded before fetching and sorting template
+    if (!isNew && id && dimensions.length > 0) {
       const fetchTemplate = async () => {
         try {
           const template = await templateService.getById(id);
+          // Sort questions by dimension order, then by question order within dimension
+          // This matches how questions are displayed in the evaluation form
+          const sortedQuestions = [...template.questions].sort((a, b) => {
+            // First sort by dimension
+            const dimA = dimensions.find(d => String(d.id) === a.dimensionId);
+            const dimB = dimensions.find(d => String(d.id) === b.dimensionId);
+            const dimOrderA = dimA?.order ?? 999;
+            const dimOrderB = dimB?.order ?? 999;
+            if (dimOrderA !== dimOrderB) {
+              return dimOrderA - dimOrderB;
+            }
+            // Then sort by question order within the same dimension
+            return a.order - b.order;
+          });
+
           reset({
             title: template.title,
             description: template.description || '',
             milestone: template.milestone,
             targetRole: template.targetRole,
             isActive: template.isActive,
-            questions: template.questions.sort((a, b) => a.order - b.order).map(q => ({
+            questions: sortedQuestions.map(q => ({
               id: q.id,
               text: q.text,
               dimensionId: q.dimensionId,
@@ -101,7 +148,7 @@ const TemplateEditor = () => {
       };
       fetchTemplate();
     }
-  }, [id, isNew, navigate, reset]);
+  }, [id, isNew, navigate, reset, dimensions]);
 
   const onSubmit = async (data: TemplateFormData) => {
     try {
@@ -136,17 +183,31 @@ const TemplateEditor = () => {
     }
   };
 
-  const handleDragEnd = (result: any) => {
+  // Handle drag end for reordering questions within a dimension
+  const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    move(result.source.index, result.destination.index);
+    
+    const sourceDroppableId = result.source.droppableId;
+    const destDroppableId = result.destination.droppableId;
+    
+    // Only allow reordering within the same dimension
+    if (sourceDroppableId !== destDroppableId) return;
+    
+    const dimQuestions = questionsByDimension[sourceDroppableId];
+    if (!dimQuestions) return;
+    
+    const sourceIndex = dimQuestions[result.source.index]?.index;
+    const destIndex = dimQuestions[result.destination.index]?.index;
+    
+    if (sourceIndex !== undefined && destIndex !== undefined) {
+      move(sourceIndex, destIndex);
+    }
   };
 
-  const addQuestion = () => {
-    // Use first available dimension or empty string if none available
-    const defaultDimensionId = dimensions.length > 0 ? dimensions[0].id : '';
+  const addQuestion = (dimensionId: string) => {
     append({
       text: '',
-      dimensionId: defaultDimensionId,
+      dimensionId: dimensionId,
       type: QuestionType.SCALE_1_4,
       order: fields.length + 1,
       required: true
@@ -253,115 +314,163 @@ const TemplateEditor = () => {
           </div>
         </div>
 
-        {/* Questions Editor */}
+        {/* Questions Editor - Grouped by Dimension */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white shadow rounded-lg p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="mb-6">
               <h3 className="text-lg font-medium text-gray-900">Preguntas ({fields.length})</h3>
-              <Button type="button" onClick={addQuestion} variant="secondary" size="sm">
-                <Plus size={16} className="mr-1" /> Agregar Pregunta
-              </Button>
+              <p className="text-xs text-gray-500 mt-1">
+                Las preguntas se muestran agrupadas por dimensión, tal como aparecerán en la evaluación
+              </p>
             </div>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="questions">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
-                    {fields.map((field, index) => (
-                      <Draggable key={field.id} draggableId={field.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={clsx(
-                              "border rounded-lg p-4 bg-white transition-shadow",
-                              snapshot.isDragging ? "shadow-lg ring-2 ring-brand-primary/20" : "border-gray-200 hover:border-brand-primary/50"
-                            )}
-                          >
-                            <div className="flex gap-3">
-                              <div {...provided.dragHandleProps} className="mt-2 text-gray-400 hover:text-gray-600 cursor-move">
-                                <GripVertical size={20} />
-                              </div>
-                              
-                              <div className="flex-1 space-y-3">
-                                <div className="flex gap-4">
-                                  <div className="flex-1">
-                                    <Input
-                                      {...register(`questions.${index}.text` as const, { required: true })}
-                                      placeholder="Escribe la pregunta..."
-                                      className="font-medium"
-                                    />
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => remove(index)}
-                                    className="text-gray-400 hover:text-red-500 p-2 transition-colors"
-                                    title="Eliminar pregunta"
-                                  >
-                                    <Trash2 size={18} />
-                                  </button>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                  <div>
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Dimensión</label>
-                                    <select
-                                      {...register(`questions.${index}.dimensionId` as const, { required: true })}
-                                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
-                                    >
-                                      {dimensions.length === 0 ? (
-                                        <option value="">Cargando dimensiones...</option>
-                                      ) : (
-                                        dimensions.map((dim) => (
-                                          <option key={dim.id} value={dim.id}>
-                                            {dim.name}
-                                          </option>
-                                        ))
-                                      )}
-                                    </select>
-                                  </div>
-
-                                  <div>
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Tipo de Respuesta</label>
-                                    <select
-                                      {...register(`questions.${index}.type` as const)}
-                                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
-                                    >
-                                      <option value={QuestionType.SCALE_1_4}>Escala 1 a 4</option>
-                                      <option value={QuestionType.OPEN_TEXT}>Texto Abierto</option>
-                                    </select>
-                                  </div>
-
-                                  <div className="flex items-center pt-6">
-                                    <label className="flex items-center text-sm text-gray-600 cursor-pointer">
-                                      <input
-                                        type="checkbox"
-                                        {...register(`questions.${index}.required` as const)}
-                                        className="mr-2 h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
-                                      />
-                                      Obligatoria
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
+            {fields.length === 0 ? (
+              <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg text-gray-500">
+                <p>No hay preguntas en esta plantilla.</p>
+                <p className="text-sm mt-2">Agrega preguntas desde cada dimensión disponible abajo.</p>
+                {dimensions.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {dimensions.map((dim) => (
+                      <Button
+                        key={dim.id}
+                        type="button"
+                        onClick={() => addQuestion(String(dim.id))}
+                        variant="ghost"
+                        size="sm"
+                        className="text-brand-primary"
+                      >
+                        <Plus size={14} className="mr-1" /> Agregar a {dim.name}
+                      </Button>
                     ))}
-                    {provided.placeholder}
                   </div>
                 )}
-              </Droppable>
-            </DragDropContext>
-            
-            {fields.length === 0 && (
-              <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg text-gray-500">
-                <p>No has agregado preguntas a esta plantilla.</p>
-                <Button type="button" onClick={addQuestion} variant="ghost" className="mt-2 text-brand-primary">
-                  + Agregar primera pregunta
-                </Button>
               </div>
+            ) : (
+              <DragDropContext onDragEnd={onDragEnd}>
+                <div className="space-y-6">
+                  {sortedDimensionIds.map((dimensionId) => {
+                    const dimension = dimensions.find(d => String(d.id) === dimensionId);
+                    const dimQuestions = questionsByDimension[dimensionId];
+                    
+                    return (
+                      <div key={dimensionId} className="border border-gray-200 rounded-lg overflow-hidden">
+                        {/* Dimension Header */}
+                        <div className="bg-gray-100 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                          <h4 className="font-semibold text-gray-800">
+                            Dimensión: {dimension?.name || 'Sin dimensión'}
+                          </h4>
+                          <Button 
+                            type="button" 
+                            onClick={() => addQuestion(dimensionId)} 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-xs"
+                          >
+                            <Plus size={14} className="mr-1" /> Agregar pregunta
+                          </Button>
+                        </div>
+
+                        {/* Questions in this dimension - Droppable area */}
+                        <Droppable droppableId={dimensionId}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`divide-y divide-gray-100 ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
+                            >
+                              {dimQuestions.map(({ question: field, index }, posInDim) => (
+                                <Draggable key={field.id} draggableId={field.id} index={posInDim}>
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      className={`p-4 bg-white transition-colors ${snapshot.isDragging ? 'shadow-lg ring-2 ring-brand-primary' : 'hover:bg-gray-50'}`}
+                                    >
+                                      <div className="flex gap-3">
+                                        {/* Drag handle */}
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="flex items-center text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                                          title="Arrastra para reordenar"
+                                        >
+                                          <GripVertical size={20} />
+                                        </div>
+                                        
+                                        <div className="flex-1 space-y-3">
+                                          <div className="flex gap-4">
+                                            <div className="flex-1">
+                                              <Input
+                                                {...register(`questions.${index}.text` as const, { required: true })}
+                                                placeholder="Escribe la pregunta..."
+                                                className="font-medium"
+                                              />
+                                            </div>
+                                            <button
+                                              type="button"
+                                              onClick={() => remove(index)}
+                                              className="text-gray-400 hover:text-red-500 p-2 transition-colors"
+                                              title="Eliminar pregunta"
+                                            >
+                                              <Trash2 size={18} />
+                                            </button>
+                                          </div>
+
+                                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div>
+                                              <label className="text-xs font-medium text-gray-500 mb-1 block">Dimensión</label>
+                                              <select
+                                                {...register(`questions.${index}.dimensionId` as const, { required: true })}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
+                                              >
+                                                {dimensions.length === 0 ? (
+                                                  <option value="">Cargando dimensiones...</option>
+                                                ) : (
+                                                  dimensions.map((dim) => (
+                                                    <option key={dim.id} value={dim.id}>
+                                                      {dim.name}
+                                                    </option>
+                                                  ))
+                                                )}
+                                              </select>
+                                            </div>
+
+                                            <div>
+                                              <label className="text-xs font-medium text-gray-500 mb-1 block">Tipo de Respuesta</label>
+                                              <select
+                                                {...register(`questions.${index}.type` as const)}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary text-sm"
+                                              >
+                                                <option value={QuestionType.SCALE_1_4}>Escala 1 a 4</option>
+                                                <option value={QuestionType.OPEN_TEXT}>Texto Abierto</option>
+                                              </select>
+                                            </div>
+
+                                            <div className="flex items-center pt-6">
+                                              <label className="flex items-center text-sm text-gray-600 cursor-pointer">
+                                                <input
+                                                  type="checkbox"
+                                                  {...register(`questions.${index}.required` as const)}
+                                                  className="mr-2 h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
+                                                />
+                                                Obligatoria
+                                              </label>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DragDropContext>
             )}
           </div>
         </div>

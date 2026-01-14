@@ -3,4 +3,3 @@ export enum UserRole {
   TEAM_LEADER = 'TEAM_LEADER',
   SPECIALIST = 'SPECIALIST',
 }
-

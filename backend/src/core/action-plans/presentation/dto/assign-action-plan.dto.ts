@@ -1,4 +1,10 @@
-import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 import { ActionPlanType } from '../../domain/value-objects/action-plan-type.enum';
 import { AssignActionPlanCommand } from '../../application/commands/assign-action-plan.command';
 
@@ -19,7 +25,7 @@ export class AssignActionPlanDto {
   @IsNotEmpty()
   dueDate: string;
 
-  toCommand(collaboratorId: string): AssignActionPlanCommand {
+  toCommand(collaboratorId: number): AssignActionPlanCommand {
     return new AssignActionPlanCommand(
       collaboratorId,
       this.type,
@@ -29,4 +35,3 @@ export class AssignActionPlanDto {
     );
   }
 }
-

@@ -20,7 +20,9 @@ export class PostgresClientRepository implements IClientRepository {
   }
 
   async findById(id: string): Promise<Client | null> {
-    const ormEntity = await this.repository.findOne({ where: { id: Number(id) } });
+    const ormEntity = await this.repository.findOne({
+      where: { id: Number(id) },
+    });
     return ormEntity ? ClientMapper.toDomain(ormEntity) : null;
   }
 
@@ -35,4 +37,3 @@ export class PostgresClientRepository implements IClientRepository {
     await this.repository.delete({ id: Number(id) });
   }
 }
-

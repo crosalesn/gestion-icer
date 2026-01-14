@@ -7,4 +7,3 @@ export interface IDimensionRepository {
   findAll(): Promise<Dimension[]>;
   findAllActive(): Promise<Dimension[]>;
 }
-

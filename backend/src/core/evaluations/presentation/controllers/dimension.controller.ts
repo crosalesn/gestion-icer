@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { GetAllDimensionsUseCase } from '../../application/use-cases/get-all-dimensions.use-case';
 import { GetDimensionByIdUseCase } from '../../application/use-cases/get-dimension-by-id.use-case';
@@ -42,7 +56,9 @@ export class DimensionController {
     description: 'Dimensión encontrada',
     type: DimensionResponseDto,
   })
-  async getDimensionById(@Param('id') id: string): Promise<DimensionResponseDto> {
+  async getDimensionById(
+    @Param('id') id: string,
+  ): Promise<DimensionResponseDto> {
     const dimension = await this.getDimensionByIdUseCase.execute(id);
     return DimensionResponseDto.fromDomain(dimension);
   }
@@ -54,7 +70,9 @@ export class DimensionController {
     description: 'Dimensión creada exitosamente',
     type: DimensionResponseDto,
   })
-  async createDimension(@Body() dto: CreateDimensionDto): Promise<DimensionResponseDto> {
+  async createDimension(
+    @Body() dto: CreateDimensionDto,
+  ): Promise<DimensionResponseDto> {
     const command = dto.toCommand();
     const dimension = await this.createDimensionUseCase.execute(command);
     return DimensionResponseDto.fromDomain(dimension);
@@ -87,4 +105,3 @@ export class DimensionController {
     return { message: 'Dimensión desactivada exitosamente' };
   }
 }
-

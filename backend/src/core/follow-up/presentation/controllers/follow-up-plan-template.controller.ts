@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateFollowUpPlanTemplateUseCase } from '../../application/use-cases/create-follow-up-plan-template.use-case';
 import { GetAllFollowUpPlanTemplatesUseCase } from '../../application/use-cases/get-all-follow-up-plan-templates.use-case';
@@ -31,7 +39,10 @@ export class FollowUpPlanTemplateController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateFollowUpPlanTemplateDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateFollowUpPlanTemplateDto,
+  ) {
     return this.updateUseCase.execute(id, dto);
   }
 
@@ -40,4 +51,3 @@ export class FollowUpPlanTemplateController {
     return this.deleteUseCase.execute(id);
   }
 }
-

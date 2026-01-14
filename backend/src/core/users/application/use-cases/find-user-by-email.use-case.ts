@@ -13,4 +13,3 @@ export class FindUserByEmailUseCase {
     return await this.userRepository.findByEmail(email);
   }
 }
-

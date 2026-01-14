@@ -27,4 +27,3 @@ import { IClientRepository } from './domain/repositories/client.repository.inter
   exports: [IClientRepository], // Export if other modules need it
 })
 export class ClientsModule {}
-

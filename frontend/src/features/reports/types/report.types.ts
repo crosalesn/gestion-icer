@@ -1,14 +1,14 @@
 export interface Evaluation {
-  id: string;
-  type: 'DAY_1' | 'WEEK_1_COLLABORATOR' | 'WEEK_1_LEADER' | 'MONTH_1_COLLABORATOR' | 'MONTH_1_LEADER';
+  id: number;
+  type: 'DAY_1' | 'WEEK_1' | 'MONTH_1';
   score: number | null;
   status: 'PENDING' | 'COMPLETED';
   createdAt: string;
-  completedAt?: string;
+  completedAt: string | null;
 }
 
 export interface ActionPlan {
-  id: string;
+  id: number;
   type: 'PD_30' | 'PDF_30' | 'SE_60';
   description: string;
   dueDate: string;
@@ -17,7 +17,7 @@ export interface ActionPlan {
 
 export interface CollaboratorHistory {
   collaborator: {
-    id: string;
+    id: number;
     name: string;
     role: string;
     project: string;
@@ -38,7 +38,7 @@ export interface DashboardStats {
     none: number;
   };
   highRiskCollaborators: Array<{
-    id: string;
+    id: number;
     name: string;
     project: string;
     riskLevel: string;

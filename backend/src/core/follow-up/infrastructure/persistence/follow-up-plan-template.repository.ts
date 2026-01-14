@@ -26,7 +26,9 @@ export class FollowUpPlanTemplateRepository implements IFollowUpPlanTemplateRepo
         createdAt: 'ASC',
       },
     });
-    return entities.map(FollowUpPlanTemplateMapper.toDomain);
+    return entities.map((entity) =>
+      FollowUpPlanTemplateMapper.toDomain(entity),
+    );
   }
 
   async findById(id: string): Promise<FollowUpPlanTemplate | null> {
@@ -43,7 +45,9 @@ export class FollowUpPlanTemplateRepository implements IFollowUpPlanTemplateRepo
     return FollowUpPlanTemplateMapper.toDomain(entity);
   }
 
-  async findByRiskLevel(riskLevel: string): Promise<FollowUpPlanTemplate | null> {
+  async findByRiskLevel(
+    riskLevel: string,
+  ): Promise<FollowUpPlanTemplate | null> {
     // We assume there's one default template per risk level for now, or just return one
     // Ideally we should have a flag 'isDefault' if we have multiple
     const entity = await this.repository.findOne({
@@ -63,4 +67,3 @@ export class FollowUpPlanTemplateRepository implements IFollowUpPlanTemplateRepo
     await this.repository.delete(Number(id));
   }
 }
-

@@ -3,12 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EvaluationController } from './presentation/controllers/evaluation.controller';
 import { SeedController } from './presentation/controllers/seed.controller';
 import { DimensionController } from './presentation/controllers/dimension.controller';
-import { CreateEvaluationUseCase } from './application/use-cases/create-evaluation.use-case';
-import { SubmitEvaluationUseCase } from './application/use-cases/submit-evaluation.use-case';
-import { GetCollaboratorEvaluationsUseCase } from './application/use-cases/get-collaborator-evaluations.use-case';
-import { GetEvaluationByIdUseCase } from './application/use-cases/get-evaluation-by-id.use-case';
-import { PostgresEvaluationRepository } from './infrastructure/persistence/evaluation.repository';
-import { EvaluationOrmEntity } from './infrastructure/persistence/evaluation.orm-entity';
 import { CollaboratorsModule } from '../collaborators/collaborators.module';
 import { UsersModule } from '../users/users.module';
 import { ActionPlansModule } from '../action-plans/action-plans.module';
@@ -44,24 +38,19 @@ import { AssignFollowUpPlanUseCase } from '../follow-up/application/use-cases/as
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      EvaluationOrmEntity,
       EvaluationTemplateOrmEntity,
       QuestionOrmEntity,
       DimensionOrmEntity,
       EvaluationAssignmentOrmEntity,
       MilestoneResultOrmEntity,
     ]),
-    forwardRef(() => CollaboratorsModule), // Use forwardRef to avoid circular dependency
+    forwardRef(() => CollaboratorsModule),
     UsersModule,
     ActionPlansModule,
     FollowUpModule,
   ],
   controllers: [EvaluationController, SeedController, DimensionController],
   providers: [
-    CreateEvaluationUseCase,
-    SubmitEvaluationUseCase,
-    GetCollaboratorEvaluationsUseCase,
-    GetEvaluationByIdUseCase,
     AssignEvaluationUseCase,
     GetPendingEvaluationsUseCase,
     SubmitAssignmentAnswersUseCase,
@@ -81,10 +70,6 @@ import { AssignFollowUpPlanUseCase } from '../follow-up/application/use-cases/as
     GetTemplateByIdUseCase,
     AssignFollowUpPlanUseCase,
     {
-      provide: 'IEvaluationRepository',
-      useClass: PostgresEvaluationRepository,
-    },
-    {
       provide: 'IEvaluationTemplateRepository',
       useClass: PostgresEvaluationTemplateRepository,
     },
@@ -102,7 +87,6 @@ import { AssignFollowUpPlanUseCase } from '../follow-up/application/use-cases/as
     },
   ],
   exports: [
-    'IEvaluationRepository',
     'IEvaluationTemplateRepository',
     'IEvaluationAssignmentRepository',
     'IMilestoneResultRepository',

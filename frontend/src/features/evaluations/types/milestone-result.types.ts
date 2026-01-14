@@ -8,11 +8,11 @@ export enum RiskLevel {
 }
 
 export interface MilestoneResult {
-  id: string;
-  collaboratorId: string;
+  id: number;
+  collaboratorId: number;
   milestone: EvaluationMilestone;
-  collaboratorAssignmentId: string | null;
-  teamLeaderAssignmentId: string | null;
+  collaboratorAssignmentId: number | null;
+  teamLeaderAssignmentId: number | null;
   finalScore: number;
   riskLevel: RiskLevel;
   calculatedAt: string;
@@ -25,4 +25,3 @@ export interface MilestoneResultWithDetails extends MilestoneResult {
   collaboratorScore?: number;
   teamLeaderScore?: number;
 }
-

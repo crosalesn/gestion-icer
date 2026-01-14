@@ -3,8 +3,8 @@ import { ActionPlanStatus } from '../value-objects/action-plan-status.enum';
 
 export class ActionPlan {
   constructor(
-    private readonly _id: string,
-    private readonly _collaboratorId: string,
+    private _id: number | null, // null for new entities, assigned by DB after save
+    private readonly _collaboratorId: number,
     private readonly _type: ActionPlanType,
     private _description: string,
     private _goals: string[], // List of specific goals or gaps to address
@@ -14,11 +14,11 @@ export class ActionPlan {
     private _dueDate: Date,
   ) {}
 
-  get id(): string {
+  get id(): number | null {
     return this._id;
   }
 
-  get collaboratorId(): string {
+  get collaboratorId(): number {
     return this._collaboratorId;
   }
 
@@ -50,17 +50,16 @@ export class ActionPlan {
     return this._dueDate;
   }
 
-  // Factory method
+  // Factory method (id will be assigned by DB)
   static create(
-    id: string,
-    collaboratorId: string,
+    collaboratorId: number,
     type: ActionPlanType,
     description: string,
     goals: string[],
     dueDate: Date,
   ): ActionPlan {
     return new ActionPlan(
-      id,
+      null, // id is null for new entities
       collaboratorId,
       type,
       description,
@@ -74,8 +73,8 @@ export class ActionPlan {
 
   // Reconstitute
   static reconstitute(
-    id: string,
-    collaboratorId: string,
+    id: number,
+    collaboratorId: number,
     type: ActionPlanType,
     description: string,
     goals: string[],
@@ -107,4 +106,3 @@ export class ActionPlan {
     this._updatedAt = new Date();
   }
 }
-

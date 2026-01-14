@@ -13,13 +13,14 @@ export class PostgresUserRepository implements IUserRepository {
     private readonly repository: Repository<UserOrmEntity>,
   ) {}
 
-  async save(user: User): Promise<void> {
+  async save(user: User): Promise<User> {
     const ormEntity = UserMapper.toOrm(user);
-    await this.repository.save(ormEntity);
+    const saved = await this.repository.save(ormEntity);
+    return UserMapper.toDomain(saved);
   }
 
-  async findById(id: string): Promise<User | null> {
-    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
+  async findById(id: number): Promise<User | null> {
+    const ormEntity = await this.repository.findOne({ where: { id } });
     return ormEntity ? UserMapper.toDomain(ormEntity) : null;
   }
 
@@ -33,4 +34,3 @@ export class PostgresUserRepository implements IUserRepository {
     return ormEntities.map((orm) => UserMapper.toDomain(orm));
   }
 }
-

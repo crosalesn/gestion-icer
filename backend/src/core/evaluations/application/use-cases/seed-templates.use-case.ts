@@ -31,7 +31,11 @@ export class SeedTemplatesUseCase {
     private readonly dimensionRepository: IDimensionRepository,
   ) {}
 
-  async execute(): Promise<{ created: number; skipped: number; templates: EvaluationTemplate[] }> {
+  async execute(): Promise<{
+    created: number;
+    skipped: number;
+    templates: EvaluationTemplate[];
+  }> {
     this.logger.log('Starting template seed process');
 
     // First, ensure dimensions are seeded
@@ -104,7 +108,9 @@ export class SeedTemplatesUseCase {
   private getDimensionId(code: string): string {
     const dim = this.dimensionMap.get(code);
     if (!dim) {
-      throw new Error(`Dimension with code ${code} not found. Make sure dimensions are seeded.`);
+      throw new Error(
+        `Dimension with code ${code} not found. Make sure dimensions are seeded.`,
+      );
     }
     return dim.id;
   }
@@ -203,7 +209,8 @@ export class SeedTemplatesUseCase {
       milestone: EvaluationMilestone.WEEK_1,
       targetRole: TargetRole.COLLABORATOR,
       title: 'Evaluación ICER - Semana 1 (Colaborador)',
-      description: 'Autoevaluación del colaborador después de su primera semana',
+      description:
+        'Autoevaluación del colaborador después de su primera semana',
       questions: [
         {
           text: '¿Te sientes integrado al equipo?',
@@ -296,7 +303,8 @@ export class SeedTemplatesUseCase {
       milestone: EvaluationMilestone.WEEK_1,
       targetRole: TargetRole.TEAM_LEADER,
       title: 'Evaluación ICER - Semana 1 (Team Leader)',
-      description: 'Evaluación del Team Leader sobre el colaborador en su primera semana',
+      description:
+        'Evaluación del Team Leader sobre el colaborador en su primera semana',
       questions: [
         {
           text: '¿Cómo sientes que ha sido la integración del colaborador con el equipo en estos primeros días?',
@@ -454,7 +462,8 @@ export class SeedTemplatesUseCase {
       milestone: EvaluationMilestone.MONTH_1,
       targetRole: TargetRole.TEAM_LEADER,
       title: 'Evaluación ICER - Mes 1 (Team Leader)',
-      description: 'Evaluación del Team Leader sobre el colaborador después de su primer mes',
+      description:
+        'Evaluación del Team Leader sobre el colaborador después de su primer mes',
       questions: [
         {
           text: '¿Cómo describirías la relación del colaborador con el equipo después de este primer mes?',

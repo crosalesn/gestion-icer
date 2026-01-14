@@ -11,8 +11,8 @@ export enum ActionPlanStatus {
 }
 
 export interface ActionPlan {
-  id: string;
-  collaboratorId: string;
+  id: number;
+  collaboratorId: number;
   type: ActionPlanType;
   description: string;
   status: ActionPlanStatus;
@@ -27,4 +27,3 @@ export interface AssignActionPlanPayload {
   description: string;
   dueDate: string;
 }
-

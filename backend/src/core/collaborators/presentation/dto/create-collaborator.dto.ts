@@ -1,4 +1,11 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { CreateCollaboratorCommand } from '../../application/commands/create-collaborator.command';
 import { parseDateOnly } from '../../../../common/utils/date.utils';
 
@@ -27,9 +34,9 @@ export class CreateCollaboratorDto {
   @IsNotEmpty()
   teamLeader: string;
 
-  @IsString()
-  @IsNotEmpty()
-  clientId: string;
+  @IsNumber()
+  @Type(() => Number)
+  clientId: number;
 
   toCommand(): CreateCollaboratorCommand {
     return new CreateCollaboratorCommand(

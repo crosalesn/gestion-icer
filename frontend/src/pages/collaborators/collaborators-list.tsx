@@ -78,7 +78,7 @@ const CollaboratorsList = () => {
       return [];
     }
 
-    let filtered = collaborators.filter(c => {
+    const filtered = collaborators.filter(c => {
       if (!c) return false;
       
       const matchesSearch = 

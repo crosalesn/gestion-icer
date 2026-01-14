@@ -35,10 +35,16 @@ export class SubmitAssignmentAnswersUseCase {
     private readonly calculateMilestoneResultUseCase: CalculateMilestoneResultUseCase,
   ) {}
 
-  async execute(command: SubmitAssignmentAnswersCommand): Promise<EvaluationAssignment> {
-    this.logger.log(`Submitting answers for assignment ${command.assignmentId}`);
+  async execute(
+    command: SubmitAssignmentAnswersCommand,
+  ): Promise<EvaluationAssignment> {
+    this.logger.log(
+      `Submitting answers for assignment ${command.assignmentId}`,
+    );
 
-    const assignment = await this.assignmentRepository.findById(command.assignmentId);
+    const assignment = await this.assignmentRepository.findById(
+      command.assignmentId,
+    );
     if (!assignment) {
       throw new Error('Assignment not found');
     }
@@ -48,7 +54,9 @@ export class SubmitAssignmentAnswersUseCase {
     }
 
     // Get template to validate answers
-    const template = await this.templateRepository.findById(assignment.templateId);
+    const template = await this.templateRepository.findById(
+      assignment.templateId,
+    );
     if (!template) {
       throw new Error('Template not found');
     }
@@ -57,25 +65,29 @@ export class SubmitAssignmentAnswersUseCase {
     this.validateAnswers(command.answers, template.questions);
 
     // Calculate individual score (average of scale questions only)
-    const score = this.calculateIndividualScore(command.answers, template.questions);
+    const score = this.calculateIndividualScore(
+      command.answers,
+      template.questions,
+    );
 
     // Complete the assignment
     assignment.complete(command.answers, score);
 
-    await this.assignmentRepository.save(assignment);
+    const savedAssignment = await this.assignmentRepository.save(assignment);
 
-    this.logger.log(`Assignment ${command.assignmentId} completed with score ${score}`);
+    this.logger.log(
+      `Assignment ${command.assignmentId} completed with score ${score}`,
+    );
 
     // Update collaborator risk level directly from this evaluation
-    // The risk level is always updated to reflect the latest evaluation
     try {
-      // assignment.collaboratorId is the internal numeric ID (as string)
-      // We need to lookup the collaborator by internal ID to get the UUID for other operations
-      const collaborator = await this.collaboratorRepository.findByInternalId(
+      const collaborator = await this.collaboratorRepository.findById(
         assignment.collaboratorId,
       );
       if (!collaborator) {
-        throw new Error(`Collaborator with internal ID ${assignment.collaboratorId} not found`);
+        throw new Error(
+          `Collaborator with ID ${assignment.collaboratorId} not found`,
+        );
       }
 
       await this.updateCollaboratorRisk(
@@ -83,11 +95,9 @@ export class SubmitAssignmentAnswersUseCase {
         score,
         assignment.milestone,
       );
-      
+
       // Calculate and create milestone result for display in collaborator detail
-      // This creates the consolidated result that shows in the UI
       try {
-        // Use the internal ID for milestone result (as it uses numeric ID for FK)
         await this.calculateMilestoneResultUseCase.execute(
           assignment.collaboratorId,
           assignment.milestone,
@@ -96,42 +106,45 @@ export class SubmitAssignmentAnswersUseCase {
           `Milestone result calculated for collaborator ${collaborator.id}, milestone ${assignment.milestone}`,
         );
       } catch (error) {
-        // Log but don't fail if milestone result calculation fails
-        // This can happen if not all required evaluations are completed yet
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         this.logger.warn(
-          `Failed to calculate milestone result: ${error.message}`,
+          `Failed to calculate milestone result: ${errorMessage}`,
         );
       }
-      
-      // Create next evaluation automatically - use UUID for AssignEvaluationCommand
-      await this.createNextEvaluation(collaborator.id, assignment.milestone);
+
+      // Create next evaluation automatically
+      await this.createNextEvaluation(collaborator.id!, assignment.milestone);
     } catch (error) {
-      // Log but don't fail the submission if risk update or next evaluation creation fails
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn(
-        `Failed to update collaborator risk or create next evaluation: ${error.message}`,
+        `Failed to update collaborator risk or create next evaluation: ${errorMessage}`,
       );
     }
 
-    return assignment;
+    return savedAssignment;
   }
 
   private async createNextEvaluation(
-    collaboratorId: string,
+    collaboratorId: number,
     currentMilestone: EvaluationMilestone,
   ): Promise<void> {
     // Check if there are other pending assignments for the current milestone
-    // We only advance to the next milestone when ALL assignments for the current one are completed
-    const currentMilestoneAssignments = await this.assignmentRepository.findByCollaboratorAndMilestone(
-      collaboratorId,
-      currentMilestone,
-    );
-    
+    const currentMilestoneAssignments =
+      await this.assignmentRepository.findByCollaboratorAndMilestone(
+        collaboratorId,
+        currentMilestone,
+      );
+
     const hasPending = currentMilestoneAssignments.some(
-      (a) => a.status !== EvaluationStatus.COMPLETED
+      (a) => a.status !== EvaluationStatus.COMPLETED,
     );
 
     if (hasPending) {
-      this.logger.log(`There are still pending assignments for milestone ${currentMilestone}. Next milestone will not be created yet.`);
+      this.logger.log(
+        `There are still pending assignments for milestone ${currentMilestone}. Next milestone will not be created yet.`,
+      );
       return;
     }
 
@@ -143,7 +156,6 @@ export class SubmitAssignmentAnswersUseCase {
     } else if (currentMilestone === EvaluationMilestone.WEEK_1) {
       nextMilestone = EvaluationMilestone.MONTH_1;
     }
-    // If MONTH_1, no next milestone (end of cycle)
 
     if (!nextMilestone) {
       this.logger.log(`No next milestone after ${currentMilestone}`);
@@ -151,14 +163,19 @@ export class SubmitAssignmentAnswersUseCase {
     }
 
     try {
-      const command = new AssignEvaluationCommand(collaboratorId, nextMilestone);
+      const command = new AssignEvaluationCommand(
+        collaboratorId,
+        nextMilestone,
+      );
       await this.assignEvaluationUseCase.execute(command);
       this.logger.log(
         `Automatically created next evaluation: ${nextMilestone} for collaborator ${collaboratorId}`,
       );
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn(
-        `Failed to create next evaluation ${nextMilestone}: ${error.message}`,
+        `Failed to create next evaluation ${nextMilestone}: ${errorMessage}`,
       );
     }
   }
@@ -191,7 +208,11 @@ export class SubmitAssignmentAnswersUseCase {
       }
 
       if (question.type === QuestionType.SCALE_1_4) {
-        if (typeof answer.value !== 'number' || answer.value < 1 || answer.value > 4) {
+        if (
+          typeof answer.value !== 'number' ||
+          answer.value < 1 ||
+          answer.value > 4
+        ) {
           throw new Error(
             `Invalid answer value for question ${answer.questionId}: must be between 1 and 4`,
           );
@@ -206,7 +227,11 @@ export class SubmitAssignmentAnswersUseCase {
   ): number {
     const scaleAnswers = answers.filter((answer) => {
       const question = questions.find((q) => q.id === answer.questionId);
-      return question && question.type === QuestionType.SCALE_1_4 && typeof answer.value === 'number';
+      return (
+        question &&
+        question.type === QuestionType.SCALE_1_4 &&
+        typeof answer.value === 'number'
+      );
     });
 
     if (scaleAnswers.length === 0) {
@@ -218,23 +243,16 @@ export class SubmitAssignmentAnswersUseCase {
       0,
     );
 
-    return Math.round((totalScore / scaleAnswers.length) * 10) / 10; // Round to 1 decimal
+    return Math.round((totalScore / scaleAnswers.length) * 10) / 10;
   }
 
-  /**
-   * Updates the collaborator's risk level based on the evaluation score.
-   * The risk level is always updated to reflect the latest evaluation.
-   * Automatically creates action plans for HIGH or MEDIUM risk levels.
-   */
   private async updateCollaboratorRisk(
     collaborator: Collaborator,
     score: number,
     milestone: EvaluationMilestone,
   ): Promise<void> {
-    // Calculate risk level from score
     const riskLevel = RiskCalculatorService.calculateRiskFromScore(score);
 
-    // Update collaborator's risk level (always overwrites previous risk level)
     collaborator.updateRiskLevel(riskLevel);
     await this.collaboratorRepository.save(collaborator);
 
@@ -242,22 +260,20 @@ export class SubmitAssignmentAnswersUseCase {
       `Updated collaborator ${collaborator.id} risk level to ${riskLevel} based on score ${score}`,
     );
 
-    // Create automatic action plan if risk is HIGH or MEDIUM
-    // Use UUID for action plan creation
-    await this.handleActionPlanCreation(collaborator.id, riskLevel, milestone, score);
+    await this.handleActionPlanCreation(
+      collaborator.id!,
+      riskLevel,
+      milestone,
+      score,
+    );
   }
 
-  /**
-   * Creates an automatic action plan based on the risk level.
-   * Only creates plans for HIGH or MEDIUM risk levels.
-   */
   private async handleActionPlanCreation(
-    collaboratorId: string,
+    collaboratorId: number,
     riskLevel: RiskLevel,
     milestone: EvaluationMilestone,
     score: number,
   ): Promise<void> {
-    // Only create action plans for HIGH or MEDIUM risk
     if (riskLevel === RiskLevel.LOW || riskLevel === RiskLevel.NONE) {
       this.logger.log(
         `Risk level ${riskLevel} does not require automatic action plan creation`,
@@ -285,10 +301,9 @@ export class SubmitAssignmentAnswersUseCase {
           'Reforzar aspectos conductuales y de comunicación',
         ];
       } else {
-        return; // Should not reach here, but just in case
+        return;
       }
 
-      // Calculate due date (30 days from now)
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 30);
 
@@ -306,12 +321,11 @@ export class SubmitAssignmentAnswersUseCase {
         `Automatic action plan ${actionPlanType} created for collaborator ${collaboratorId}`,
       );
     } catch (error) {
-      // Log but don't fail the risk update if action plan creation fails
-      // This can happen if there's already an active plan
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn(
-        `Failed to create automatic action plan: ${error.message}`,
+        `Failed to create automatic action plan: ${errorMessage}`,
       );
     }
   }
 }
-

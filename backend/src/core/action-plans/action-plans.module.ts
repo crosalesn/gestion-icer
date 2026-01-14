@@ -26,4 +26,3 @@ import { CollaboratorsModule } from '../collaborators/collaborators.module';
   exports: ['IActionPlanRepository', AssignActionPlanUseCase],
 })
 export class ActionPlansModule {}
-

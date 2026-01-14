@@ -1,7 +1,7 @@
 import { QuestionType } from '../../domain/value-objects/question-type.enum';
 
 export interface UpdateQuestionData {
-  id?: string; // If provided, update existing question; if not, create new
+  id?: string;
   text: string;
   dimensionId: string;
   type: QuestionType;
@@ -11,11 +11,11 @@ export interface UpdateQuestionData {
 
 export class UpdateTemplateCommand {
   constructor(
-    public readonly templateId: string,
+    public readonly templateId: number,
     public readonly title?: string,
     public readonly description?: string | null,
     public readonly questions?: UpdateQuestionData[],
     public readonly isActive?: boolean,
-    public readonly createNewVersion?: boolean, // If true, creates new version instead of updating
+    public readonly createNewVersion?: boolean,
   ) {}
 }

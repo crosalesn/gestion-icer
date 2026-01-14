@@ -13,9 +13,6 @@ export class ActionPlanOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
-  uuid: string;
-
   @Column({ name: 'collaborator_id', type: 'int' })
   collaboratorId: number;
 
@@ -47,4 +44,3 @@ export class ActionPlanOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

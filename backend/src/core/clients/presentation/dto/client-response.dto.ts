@@ -27,4 +27,3 @@ export class ClientResponseDto {
     return dto;
   }
 }
-

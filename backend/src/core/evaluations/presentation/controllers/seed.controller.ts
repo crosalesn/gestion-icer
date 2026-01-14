@@ -6,13 +6,16 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 @ApiTags('Seed')
 @Controller('seed')
 export class SeedController {
-  constructor(
-    private readonly seedTemplatesUseCase: SeedTemplatesUseCase,
-  ) {}
+  constructor(private readonly seedTemplatesUseCase: SeedTemplatesUseCase) {}
 
   @Post('templates')
-  @ApiOperation({ summary: 'Inicializar templates ICER (PÚBLICO - Solo desarrollo)' })
-  @ApiResponse({ status: 201, description: 'Templates inicializados exitosamente' })
+  @ApiOperation({
+    summary: 'Inicializar templates ICER (PÚBLICO - Solo desarrollo)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Templates inicializados exitosamente',
+  })
   async seedTemplates() {
     const result = await this.seedTemplatesUseCase.execute();
     return {
@@ -23,4 +26,3 @@ export class SeedController {
     };
   }
 }
-

@@ -33,11 +33,11 @@ export const fetchPendingEvaluations = createAsyncThunk(
 export const submitEvaluation = createAsyncThunk(
   'evaluations/submit',
   async (
-    { assignmentId, answers }: { assignmentId: string; answers: Array<{ questionId: string; value: number | string }> },
+    { assignmentId, answers }: { assignmentId: number; answers: Array<{ questionId: string; value: number | string }> },
     { rejectWithValue }
   ) => {
     try {
-      const data = await evaluationsService.submitAssignment(assignmentId, { answers });
+      const data = await evaluationsService.submitAssignment(String(assignmentId), { answers });
       return { assignmentId, data };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Error al enviar la evaluación');
@@ -53,7 +53,7 @@ const evaluationsSlice = createSlice({
       state.error = null;
       state.submitError = null;
     },
-    removePendingEvaluation: (state, action: PayloadAction<string>) => {
+    removePendingEvaluation: (state, action: PayloadAction<number>) => {
       state.pendingEvaluations = state.pendingEvaluations.filter(
         (evalItem) => evalItem.assignment.id !== action.payload
       );

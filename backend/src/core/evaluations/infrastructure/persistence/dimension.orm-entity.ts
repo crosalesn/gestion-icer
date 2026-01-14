@@ -32,4 +32,3 @@ export class DimensionOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

@@ -4,9 +4,7 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import { es } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import collaboratorsService from '../../../features/collaborators/services/collaborators-service';
-import evaluationsService from '../../../features/evaluations/services/evaluations-service';
 import clientsService from '../../../features/clients/services/clients-service';
-import { EvaluationMilestone } from '../../../features/evaluations/types/template.types';
 import type { CreateCollaboratorPayload } from '../../../features/collaborators/types/collaborator.types';
 import type { Client } from '../../../features/clients/types/client.types';
 import Button from '../../../shared/components/ui/button';
@@ -35,7 +33,7 @@ const CreateCollaboratorModal = ({ isOpen, onClose, onSuccess }: CreateCollabora
     role: '',
     project: '',
     teamLeader: '',
-    clientId: '',
+    clientId: 0,
   });
 
   useEffect(() => {
@@ -70,7 +68,7 @@ const CreateCollaboratorModal = ({ isOpen, onClose, onSuccess }: CreateCollabora
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'clientId' ? Number(value) : value
     }));
   };
 
@@ -98,16 +96,10 @@ const CreateCollaboratorModal = ({ isOpen, onClose, onSuccess }: CreateCollabora
         ...formData,
         admissionDate: formatDateToISO(admissionDate),
       };
-      const newCollaborator = await collaboratorsService.create(payload);
+      await collaboratorsService.create(payload);
       
-      // 2. Automatically assign Day 1 evaluation
-      try {
-        await evaluationsService.assignEvaluation(newCollaborator.id, EvaluationMilestone.DAY_1);
-        toast.success(`Colaborador ${formData.name} creado y evaluación Día 1 asignada`);
-      } catch (evalError) {
-        console.error('Error assigning Day 1 evaluation:', evalError);
-        toast.error(`Colaborador creado, pero hubo un error al asignar la evaluación inicial`);
-      }
+      // Day 1 evaluation is auto-assigned by the backend
+      toast.success(`Colaborador ${formData.name} creado y evaluación Día 1 asignada`);
       
       onSuccess();
       onClose();
@@ -119,7 +111,7 @@ const CreateCollaboratorModal = ({ isOpen, onClose, onSuccess }: CreateCollabora
         role: '',
         project: '',
         teamLeader: '',
-        clientId: '',
+        clientId: 0,
       });
       setAdmissionDate(new Date());
     } catch (err: unknown) {

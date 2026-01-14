@@ -2,8 +2,7 @@ import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-leve
 
 export class AssignFollowUpPlanCommand {
   constructor(
-    public readonly collaboratorId: string,
+    public readonly collaboratorId: number,
     public readonly riskLevel: RiskLevel,
   ) {}
 }
-

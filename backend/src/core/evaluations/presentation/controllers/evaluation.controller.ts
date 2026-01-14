@@ -6,16 +6,9 @@ import {
   Post,
   Put,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { CreateEvaluationUseCase } from '../../application/use-cases/create-evaluation.use-case';
-import { SubmitEvaluationUseCase } from '../../application/use-cases/submit-evaluation.use-case';
-import { GetCollaboratorEvaluationsUseCase } from '../../application/use-cases/get-collaborator-evaluations.use-case';
-import { GetEvaluationByIdUseCase } from '../../application/use-cases/get-evaluation-by-id.use-case';
-import { CreateEvaluationCommand } from '../../application/commands/create-evaluation.command';
-import { SubmitEvaluationCommand } from '../../application/commands/submit-evaluation.command';
-import { Evaluation } from '../../domain/entities/evaluation.entity';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
-import { EvaluationType } from '../../domain/value-objects/evaluation-type.enum';
 import { AssignEvaluationUseCase } from '../../application/use-cases/assign-evaluation.use-case';
 import { GetPendingEvaluationsUseCase } from '../../application/use-cases/get-pending-evaluations.use-case';
 import { SubmitAssignmentAnswersUseCase } from '../../application/use-cases/submit-assignment-answers.use-case';
@@ -33,7 +26,12 @@ import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
 import { TemplateResponseDto } from '../dto/template-response.dto';
 import { MilestoneResultResponseDto } from '../dto/milestone-result-response.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('Evaluations')
 @ApiBearerAuth()
@@ -41,10 +39,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 @UseGuards(JwtAuthGuard)
 export class EvaluationController {
   constructor(
-    private readonly createEvaluationUseCase: CreateEvaluationUseCase,
-    private readonly submitEvaluationUseCase: SubmitEvaluationUseCase,
-    private readonly getCollaboratorEvaluationsUseCase: GetCollaboratorEvaluationsUseCase,
-    private readonly getEvaluationByIdUseCase: GetEvaluationByIdUseCase,
     private readonly assignEvaluationUseCase: AssignEvaluationUseCase,
     private readonly getPendingEvaluationsUseCase: GetPendingEvaluationsUseCase,
     private readonly submitAssignmentAnswersUseCase: SubmitAssignmentAnswersUseCase,
@@ -57,11 +51,6 @@ export class EvaluationController {
     private readonly getCollaboratorCompletedAssignmentsUseCase: GetCollaboratorCompletedAssignmentsUseCase,
   ) {}
 
-  // ==========================================
-  // TEMPLATE-BASED EVALUATION SYSTEM (NEW)
-  // ==========================================
-  // Note: Specific routes MUST come before dynamic routes (:id)
-
   @Get('pending')
   async getAllPending() {
     return this.getPendingEvaluationsUseCase.execute();
@@ -69,7 +58,7 @@ export class EvaluationController {
 
   @Post('assign')
   async assign(
-    @Body() body: { collaboratorId: string; milestone: EvaluationMilestone },
+    @Body() body: { collaboratorId: number; milestone: EvaluationMilestone },
   ) {
     const command = new AssignEvaluationCommand(
       body.collaboratorId,
@@ -80,26 +69,39 @@ export class EvaluationController {
 
   @Post('assignments/:id/submit')
   async submitAssignment(
-    @Param('id') id: string,
-    @Body() body: { answers: Array<{ questionId: string; value: number | string }> },
+    @Param('id', ParseIntPipe) id: number,
+    @Body()
+    body: { answers: Array<{ questionId: string; value: number | string }> },
   ) {
     const command = new SubmitAssignmentAnswersCommand(id, body.answers);
     return this.submitAssignmentAnswersUseCase.execute(command);
   }
 
   @Get('collaborators/:collaboratorId/results')
-  @ApiOperation({ summary: 'Obtener resultados de evaluaciones de un colaborador' })
+  @ApiOperation({
+    summary: 'Obtener resultados de evaluaciones de un colaborador',
+  })
   @ApiResponse({ status: 200, type: [MilestoneResultResponseDto] })
-  async getCollaboratorResults(@Param('collaboratorId') collaboratorId: string) {
-    const results = await this.getCollaboratorMilestoneResultsUseCase.execute(collaboratorId);
+  async getCollaboratorResults(
+    @Param('collaboratorId', ParseIntPipe) collaboratorId: number,
+  ) {
+    const results =
+      await this.getCollaboratorMilestoneResultsUseCase.execute(collaboratorId);
     return results.map((r) => MilestoneResultResponseDto.fromDomain(r));
   }
 
   @Get('collaborators/:collaboratorId/completed-assignments')
-  @ApiOperation({ summary: 'Obtener evaluaciones completadas con respuestas de un colaborador' })
+  @ApiOperation({
+    summary:
+      'Obtener evaluaciones completadas con respuestas de un colaborador',
+  })
   @ApiResponse({ status: 200 })
-  async getCollaboratorCompletedAssignments(@Param('collaboratorId') collaboratorId: string) {
-    return this.getCollaboratorCompletedAssignmentsUseCase.execute(collaboratorId);
+  async getCollaboratorCompletedAssignments(
+    @Param('collaboratorId', ParseIntPipe) collaboratorId: number,
+  ) {
+    return this.getCollaboratorCompletedAssignmentsUseCase.execute(
+      collaboratorId,
+    );
   }
 
   // Template Administration Endpoints
@@ -123,8 +125,13 @@ export class EvaluationController {
   }
 
   @Post('templates/seed')
-  @ApiOperation({ summary: 'Inicializar templates con preguntas de la ficha ICER' })
-  @ApiResponse({ status: 201, description: 'Templates inicializados exitosamente' })
+  @ApiOperation({
+    summary: 'Inicializar templates con preguntas de la ficha ICER',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Templates inicializados exitosamente',
+  })
   async seedTemplates() {
     const result = await this.seedTemplatesUseCase.execute();
     return {
@@ -138,7 +145,9 @@ export class EvaluationController {
   @Get('templates/:id')
   @ApiOperation({ summary: 'Obtener un template de evaluación por ID' })
   @ApiResponse({ status: 200, type: TemplateResponseDto })
-  async getTemplateById(@Param('id') id: string): Promise<TemplateResponseDto> {
+  async getTemplateById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<TemplateResponseDto> {
     const template = await this.getTemplateByIdUseCase.execute(id);
     return TemplateResponseDto.fromDomain(template);
   }
@@ -147,50 +156,11 @@ export class EvaluationController {
   @ApiOperation({ summary: 'Actualizar un template de evaluación' })
   @ApiResponse({ status: 200, type: TemplateResponseDto })
   async updateTemplate(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateTemplateDto: UpdateTemplateDto,
   ): Promise<TemplateResponseDto> {
     const command = updateTemplateDto.toCommand(id);
     const template = await this.updateTemplateUseCase.execute(command);
     return TemplateResponseDto.fromDomain(template);
   }
-
-  // ==========================================
-  // LEGACY EVALUATION SYSTEM (DEPRECATED)
-  // ==========================================
-  // Note: These routes are kept for backward compatibility
-  // Dynamic routes MUST come after specific routes
-
-  @Get('collaborator/:collaboratorId')
-  async getByCollaborator(
-    @Param('collaboratorId') collaboratorId: string,
-  ): Promise<Evaluation[]> {
-    return this.getCollaboratorEvaluationsUseCase.execute(collaboratorId);
-  }
-
-  @Post()
-  async create(
-    @Body() body: { collaboratorId: string; type: EvaluationType },
-  ): Promise<Evaluation> {
-    const command = new CreateEvaluationCommand(
-      body.collaboratorId,
-      body.type,
-    );
-    return this.createEvaluationUseCase.execute(command);
-  }
-
-  @Post(':id/submit')
-  async submit(
-    @Param('id') id: string,
-    @Body() body: { answers: Record<string, number | string> },
-  ): Promise<Evaluation> {
-    const command = new SubmitEvaluationCommand(id, body.answers);
-    return this.submitEvaluationUseCase.execute(command);
-  }
-
-  @Get(':id')
-  async getById(@Param('id') id: string): Promise<Evaluation> {
-    return this.getEvaluationByIdUseCase.execute(id);
-  }
 }
-

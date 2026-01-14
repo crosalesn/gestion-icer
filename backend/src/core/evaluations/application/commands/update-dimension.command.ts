@@ -8,4 +8,3 @@ export class UpdateDimensionCommand {
     public readonly isActive?: boolean,
   ) {}
 }
-

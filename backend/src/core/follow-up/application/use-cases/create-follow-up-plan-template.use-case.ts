@@ -10,7 +10,9 @@ export class CreateFollowUpPlanTemplateUseCase {
     private readonly repository: IFollowUpPlanTemplateRepository,
   ) {}
 
-  async execute(dto: CreateFollowUpPlanTemplateDto): Promise<FollowUpPlanTemplate> {
+  async execute(
+    dto: CreateFollowUpPlanTemplateDto,
+  ): Promise<FollowUpPlanTemplate> {
     const existing = await this.repository.findByCode(dto.code);
     if (existing) {
       throw new Error(`Template with code ${dto.code} already exists`);
@@ -29,4 +31,3 @@ export class CreateFollowUpPlanTemplateUseCase {
     return this.repository.create(template);
   }
 }
-

@@ -13,9 +13,6 @@ export class ScoreCalculatorFactory {
         return new Week1CalculationStrategy();
       case EvaluationMilestone.MONTH_1:
         return new Month1CalculationStrategy();
-      default:
-        throw new Error(`No calculation strategy found for milestone: ${milestone}`);
     }
   }
 }
-

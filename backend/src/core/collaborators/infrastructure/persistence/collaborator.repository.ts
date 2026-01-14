@@ -13,22 +13,14 @@ export class PostgresCollaboratorRepository implements ICollaboratorRepository {
     private readonly repository: Repository<CollaboratorOrmEntity>,
   ) {}
 
-  async save(collaborator: Collaborator): Promise<void> {
+  async save(collaborator: Collaborator): Promise<Collaborator> {
     const ormEntity = CollaboratorMapper.toOrm(collaborator);
-    await this.repository.save(ormEntity);
+    const saved = await this.repository.save(ormEntity);
+    return CollaboratorMapper.toDomain(saved);
   }
 
-  async findById(id: string): Promise<Collaborator | null> {
-    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
-    return ormEntity ? CollaboratorMapper.toDomain(ormEntity) : null;
-  }
-
-  async findByInternalId(internalId: string): Promise<Collaborator | null> {
-    const numericId = Number(internalId);
-    if (isNaN(numericId)) {
-      return null;
-    }
-    const ormEntity = await this.repository.findOne({ where: { id: numericId } });
+  async findById(id: number): Promise<Collaborator | null> {
+    const ormEntity = await this.repository.findOne({ where: { id } });
     return ormEntity ? CollaboratorMapper.toDomain(ormEntity) : null;
   }
 
@@ -42,8 +34,7 @@ export class PostgresCollaboratorRepository implements ICollaboratorRepository {
     return ormEntities.map((orm) => CollaboratorMapper.toDomain(orm));
   }
 
-  async delete(id: string): Promise<void> {
-    await this.repository.delete({ uuid: id });
+  async delete(id: number): Promise<void> {
+    await this.repository.delete({ id });
   }
 }
-

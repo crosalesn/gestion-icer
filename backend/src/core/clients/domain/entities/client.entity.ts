@@ -49,4 +49,3 @@ export class Client {
     this._updatedAt = new Date();
   }
 }
-

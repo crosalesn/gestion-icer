@@ -1,4 +1,11 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-level.enum';
 
 export class CreateFollowUpPlanTemplateDto {
@@ -29,4 +36,3 @@ export class CreateFollowUpPlanTemplateDto {
   @IsOptional()
   description?: string;
 }
-

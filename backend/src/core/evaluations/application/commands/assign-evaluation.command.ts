@@ -2,8 +2,7 @@ import { EvaluationMilestone } from '../../domain/value-objects/evaluation-miles
 
 export class AssignEvaluationCommand {
   constructor(
-    public readonly collaboratorId: string,
+    public readonly collaboratorId: number,
     public readonly milestone: EvaluationMilestone,
   ) {}
 }
-

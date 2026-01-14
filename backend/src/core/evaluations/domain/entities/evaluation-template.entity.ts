@@ -4,7 +4,7 @@ import { Question } from './question.entity';
 
 export class EvaluationTemplate {
   constructor(
-    private readonly _id: string,
+    private _id: number | null,
     private readonly _milestone: EvaluationMilestone,
     private readonly _targetRole: TargetRole,
     private readonly _title: string,
@@ -16,7 +16,7 @@ export class EvaluationTemplate {
     private readonly _updatedAt: Date,
   ) {}
 
-  get id(): string {
+  get id(): number | null {
     return this._id;
   }
 
@@ -57,7 +57,6 @@ export class EvaluationTemplate {
   }
 
   static create(
-    id: string,
     milestone: EvaluationMilestone,
     targetRole: TargetRole,
     title: string,
@@ -67,7 +66,7 @@ export class EvaluationTemplate {
   ): EvaluationTemplate {
     const now = new Date();
     return new EvaluationTemplate(
-      id,
+      null,
       milestone,
       targetRole,
       title,
@@ -81,7 +80,7 @@ export class EvaluationTemplate {
   }
 
   static reconstitute(
-    id: string,
+    id: number,
     milestone: EvaluationMilestone,
     targetRole: TargetRole,
     title: string,
@@ -106,4 +105,3 @@ export class EvaluationTemplate {
     );
   }
 }
-

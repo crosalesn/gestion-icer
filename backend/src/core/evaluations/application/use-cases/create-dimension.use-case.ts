@@ -16,7 +16,9 @@ export class CreateDimensionUseCase {
     this.logger.log(`Creating dimension with code: ${command.code}`);
 
     // Check if code already exists
-    const existingByCode = await this.dimensionRepository.findByCode(command.code);
+    const existingByCode = await this.dimensionRepository.findByCode(
+      command.code,
+    );
     if (existingByCode) {
       throw new Error(`Dimension with code ${command.code} already exists`);
     }
@@ -34,7 +36,9 @@ export class CreateDimensionUseCase {
     await this.dimensionRepository.save(dimension);
 
     // Fetch the saved dimension to get the auto-generated ID
-    const savedDimension = await this.dimensionRepository.findByCode(command.code);
+    const savedDimension = await this.dimensionRepository.findByCode(
+      command.code,
+    );
     if (!savedDimension) {
       throw new Error('Failed to create dimension');
     }
@@ -43,4 +47,3 @@ export class CreateDimensionUseCase {
     return savedDimension;
   }
 }
-

@@ -13,4 +13,3 @@ export class GetAllFollowUpPlanTemplatesUseCase {
     return this.repository.findAll();
   }
 }
-

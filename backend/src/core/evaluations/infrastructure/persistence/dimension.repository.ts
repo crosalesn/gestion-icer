@@ -47,4 +47,3 @@ export class PostgresDimensionRepository implements IDimensionRepository {
     return ormEntities.map((orm) => DimensionMapper.toDomain(orm));
   }
 }
-

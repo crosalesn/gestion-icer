@@ -5,19 +5,19 @@ import { RiskLevel } from '../../../collaborators/domain/value-objects/risk-leve
 
 export class MilestoneResultResponseDto {
   @ApiProperty()
-  id: string;
+  id: number | null;
 
   @ApiProperty()
-  collaboratorId: string;
+  collaboratorId: number;
 
   @ApiProperty({ enum: EvaluationMilestone })
   milestone: EvaluationMilestone;
 
   @ApiProperty({ required: false, nullable: true })
-  collaboratorAssignmentId: string | null;
+  collaboratorAssignmentId: number | null;
 
   @ApiProperty({ required: false, nullable: true })
-  teamLeaderAssignmentId: string | null;
+  teamLeaderAssignmentId: number | null;
 
   @ApiProperty()
   finalScore: number;
@@ -53,6 +53,3 @@ export class MilestoneResultResponseDto {
     return dto;
   }
 }
-
-
-

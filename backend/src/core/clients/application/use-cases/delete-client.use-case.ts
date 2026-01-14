@@ -24,4 +24,3 @@ export class DeleteClientUseCase {
     this.logger.log(`Client ${command.id} deleted successfully`);
   }
 }
-

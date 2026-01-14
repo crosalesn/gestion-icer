@@ -13,4 +13,3 @@ export class GetAllActionPlansUseCase {
     return this.actionPlanRepository.findAll();
   }
 }
-

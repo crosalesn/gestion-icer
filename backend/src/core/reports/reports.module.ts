@@ -12,4 +12,3 @@ import { ActionPlansModule } from '../action-plans/action-plans.module';
   providers: [GetDashboardStatsUseCase, GetCollaboratorHistoryUseCase],
 })
 export class ReportsModule {}
-

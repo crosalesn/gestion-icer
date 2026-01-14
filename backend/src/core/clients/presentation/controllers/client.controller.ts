@@ -69,4 +69,3 @@ export class ClientController {
     await this.deleteClientUseCase.execute(command);
   }
 }
-

@@ -4,4 +4,3 @@ export class UpdateClientCommand {
     public readonly name: string,
   ) {}
 }
-

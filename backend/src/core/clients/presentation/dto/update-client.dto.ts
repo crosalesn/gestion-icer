@@ -12,4 +12,3 @@ export class UpdateClientDto {
     return new UpdateClientCommand(id, this.name);
   }
 }
-

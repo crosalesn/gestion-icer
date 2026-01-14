@@ -24,7 +24,9 @@ export class UpdateClientUseCase {
     if (command.name.toLowerCase().trim() !== client.name.toLowerCase()) {
       const existingClients = await this.clientRepository.findAll();
       const existingClient = existingClients.find(
-        (c) => c.id !== command.id && c.name.toLowerCase() === command.name.toLowerCase().trim(),
+        (c) =>
+          c.id !== command.id &&
+          c.name.toLowerCase() === command.name.toLowerCase().trim(),
       );
       if (existingClient) {
         throw new Error('Client with this name already exists');
@@ -38,4 +40,3 @@ export class UpdateClientUseCase {
     return updatedClient;
   }
 }
-

@@ -14,29 +14,30 @@ export class PostgresActionPlanRepository implements IActionPlanRepository {
     private readonly repository: Repository<ActionPlanOrmEntity>,
   ) {}
 
-  async save(actionPlan: ActionPlan): Promise<void> {
+  async save(actionPlan: ActionPlan): Promise<ActionPlan> {
     const ormEntity = ActionPlanMapper.toOrm(actionPlan);
-    await this.repository.save(ormEntity);
+    const saved = await this.repository.save(ormEntity);
+    return ActionPlanMapper.toDomain(saved);
   }
 
-  async findById(id: string): Promise<ActionPlan | null> {
-    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
+  async findById(id: number): Promise<ActionPlan | null> {
+    const ormEntity = await this.repository.findOne({ where: { id } });
     return ormEntity ? ActionPlanMapper.toDomain(ormEntity) : null;
   }
 
-  async findByCollaboratorId(collaboratorId: string): Promise<ActionPlan[]> {
+  async findByCollaboratorId(collaboratorId: number): Promise<ActionPlan[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId: Number(collaboratorId) },
+      where: { collaboratorId },
       order: { createdAt: 'DESC' },
     });
     return ormEntities.map((orm) => ActionPlanMapper.toDomain(orm));
   }
 
   async findActiveByCollaboratorId(
-    collaboratorId: string,
+    collaboratorId: number,
   ): Promise<ActionPlan | null> {
     const ormEntity = await this.repository.findOne({
-      where: { collaboratorId: Number(collaboratorId), status: ActionPlanStatus.ACTIVE },
+      where: { collaboratorId, status: ActionPlanStatus.ACTIVE },
     });
     return ormEntity ? ActionPlanMapper.toDomain(ormEntity) : null;
   }
@@ -48,4 +49,3 @@ export class PostgresActionPlanRepository implements IActionPlanRepository {
     return ormEntities.map((orm) => ActionPlanMapper.toDomain(orm));
   }
 }
-

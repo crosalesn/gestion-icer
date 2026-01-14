@@ -7,25 +7,29 @@ const ICER_DIMENSIONS = [
   {
     code: 'INTEGRATION',
     name: 'Integración',
-    description: 'Mide el nivel de integración del colaborador con el equipo y la organización',
+    description:
+      'Mide el nivel de integración del colaborador con el equipo y la organización',
     order: 1,
   },
   {
     code: 'COMMUNICATION',
     name: 'Comunicación',
-    description: 'Evalúa la calidad de la comunicación del colaborador con el equipo y stakeholders',
+    description:
+      'Evalúa la calidad de la comunicación del colaborador con el equipo y stakeholders',
     order: 2,
   },
   {
     code: 'ROLE_UNDERSTANDING',
     name: 'Entendimiento del Rol',
-    description: 'Mide el entendimiento que tiene el colaborador de sus responsabilidades y funciones',
+    description:
+      'Mide el entendimiento que tiene el colaborador de sus responsabilidades y funciones',
     order: 3,
   },
   {
     code: 'PERFORMANCE',
     name: 'Rendimiento',
-    description: 'Evalúa el rendimiento y la productividad del colaborador en sus tareas',
+    description:
+      'Evalúa el rendimiento y la productividad del colaborador en sus tareas',
     order: 4,
   },
 ];
@@ -39,7 +43,11 @@ export class SeedDimensionsUseCase {
     private readonly dimensionRepository: IDimensionRepository,
   ) {}
 
-  async execute(): Promise<{ created: number; skipped: number; dimensions: Dimension[] }> {
+  async execute(): Promise<{
+    created: number;
+    skipped: number;
+    dimensions: Dimension[];
+  }> {
     this.logger.log('Starting dimensions seed process');
 
     const dimensions: Dimension[] = [];
@@ -67,18 +75,22 @@ export class SeedDimensionsUseCase {
       );
 
       await this.dimensionRepository.save(dimension);
-      
+
       // Fetch the saved dimension to get the auto-generated ID
-      const savedDimension = await this.dimensionRepository.findByCode(dimData.code);
+      const savedDimension = await this.dimensionRepository.findByCode(
+        dimData.code,
+      );
       if (savedDimension) {
         dimensions.push(savedDimension);
       }
-      
+
       created++;
       this.logger.log(`Dimension ${dimData.code} created`);
     }
 
-    this.logger.log(`Dimensions seed completed: ${created} created, ${skipped} skipped`);
+    this.logger.log(
+      `Dimensions seed completed: ${created} created, ${skipped} skipped`,
+    );
     return { created, skipped, dimensions };
   }
 }

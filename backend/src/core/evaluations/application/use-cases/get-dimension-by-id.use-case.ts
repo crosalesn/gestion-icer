@@ -17,4 +17,3 @@ export class GetDimensionByIdUseCase {
     return dimension;
   }
 }
-

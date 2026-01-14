@@ -7,7 +7,6 @@ import UsersList from '../pages/users/users-list';
 import CreateUser from '../pages/users/create-user';
 import ClientsList from '../pages/clients/clients-list';
 import MyEvaluations from '../pages/evaluations/my-evaluations';
-import EvaluationForm from '../pages/evaluations/evaluation-form';
 import TemplatesList from '../pages/evaluations/templates-list';
 import TemplateEditor from '../pages/evaluations/template-editor';
 import DimensionsList from '../pages/evaluations/dimensions-list';
@@ -40,7 +39,6 @@ export const AppRoutes = () => {
             <Route path="/evaluaciones/dimensiones" element={<DimensionsList />} />
             <Route path="/evaluaciones/dimensiones/nueva" element={<DimensionForm />} />
             <Route path="/evaluaciones/dimensiones/:id" element={<DimensionForm />} />
-            <Route path="/evaluaciones/:id" element={<EvaluationForm />} />
             <Route path="/planes" element={<ActionPlansList />} />
             <Route path="/planes-seguimiento/configuracion" element={<FollowUpPlanTemplatesList />} />
             <Route path="/planes/asignar/:collaboratorId" element={<AssignPlan />} />

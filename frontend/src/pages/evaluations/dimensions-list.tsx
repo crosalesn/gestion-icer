@@ -47,7 +47,7 @@ const DimensionsList = () => {
       return [];
     }
 
-    let filtered = dimensions.filter(d => {
+    const filtered = dimensions.filter(d => {
       if (!d) return false;
       
       const matchesSearch = 

@@ -3,4 +3,3 @@ export enum EvaluationMilestone {
   WEEK_1 = 'WEEK_1',
   MONTH_1 = 'MONTH_1',
 }
-

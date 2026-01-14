@@ -3,4 +3,3 @@ export enum ActionPlanStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
-

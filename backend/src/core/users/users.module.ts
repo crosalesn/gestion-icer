@@ -21,11 +21,6 @@ import { UserOrmEntity } from './infrastructure/persistence/user.orm-entity';
       useClass: PostgresUserRepository,
     },
   ],
-  exports: [
-    'IUserRepository',
-    FindUserByEmailUseCase,
-    FindUserByIdUseCase,
-  ],
+  exports: ['IUserRepository', FindUserByEmailUseCase, FindUserByIdUseCase],
 })
 export class UsersModule {}
-

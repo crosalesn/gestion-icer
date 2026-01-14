@@ -13,4 +13,3 @@ export class FindAllCollaboratorsUseCase {
     return this.collaboratorRepository.findAll();
   }
 }
-

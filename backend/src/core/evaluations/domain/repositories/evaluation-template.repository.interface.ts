@@ -3,8 +3,8 @@ import { EvaluationMilestone } from '../value-objects/evaluation-milestone.enum'
 import { TargetRole } from '../value-objects/target-role.enum';
 
 export interface IEvaluationTemplateRepository {
-  save(template: EvaluationTemplate): Promise<void>;
-  findById(id: string): Promise<EvaluationTemplate | null>;
+  save(template: EvaluationTemplate): Promise<EvaluationTemplate>;
+  findById(id: number): Promise<EvaluationTemplate | null>;
   findByMilestoneAndRole(
     milestone: EvaluationMilestone,
     targetRole: TargetRole,
@@ -15,4 +15,3 @@ export interface IEvaluationTemplateRepository {
     targetRole: TargetRole,
   ): Promise<EvaluationTemplate | null>;
 }
-

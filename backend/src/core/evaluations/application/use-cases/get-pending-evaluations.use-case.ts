@@ -26,19 +26,21 @@ export class GetPendingEvaluationsUseCase {
     private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
-  async execute(userId?: string): Promise<PendingEvaluationResponseDto[]> {
+  async execute(): Promise<PendingEvaluationResponseDto[]> {
     this.logger.log(`Getting all pending evaluations`);
 
-    // Get ALL pending assignments, not filtered by user
     const pendingAssignments = await this.assignmentRepository.findAllPending();
 
     const results: PendingEvaluationResponseDto[] = [];
 
     for (const assignment of pendingAssignments) {
-      const template = await this.templateRepository.findById(assignment.templateId);
-      // collaboratorId is the internal numeric ID, so use findByInternalId
-      const collaborator = await this.collaboratorRepository.findByInternalId(assignment.collaboratorId);
-      
+      const template = await this.templateRepository.findById(
+        assignment.templateId,
+      );
+      const collaborator = await this.collaboratorRepository.findById(
+        assignment.collaboratorId,
+      );
+
       if (template && collaborator) {
         results.push(
           PendingEvaluationResponseDto.fromDomain(
@@ -46,7 +48,7 @@ export class GetPendingEvaluationsUseCase {
             template,
             collaborator.name,
             collaborator.project,
-          )
+          ),
         );
       }
     }
@@ -55,4 +57,3 @@ export class GetPendingEvaluationsUseCase {
     return results;
   }
 }
-

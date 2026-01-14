@@ -4,15 +4,14 @@ import { CollaboratorOrmEntity } from './collaborator.orm-entity';
 export class CollaboratorMapper {
   static toDomain(orm: CollaboratorOrmEntity): Collaborator {
     return Collaborator.reconstitute(
-      orm.uuid, // Use UUID for external identification
-      String(orm.id), // Internal numeric ID for FK relations
+      orm.id,
       orm.name,
       orm.email,
       orm.admissionDate,
       orm.project,
       orm.role,
       orm.teamLeader,
-      String(orm.clientId),
+      orm.clientId,
       orm.status,
       orm.riskLevel,
       orm.createdAt,
@@ -22,18 +21,17 @@ export class CollaboratorMapper {
 
   static toOrm(domain: Collaborator): CollaboratorOrmEntity {
     const orm = new CollaboratorOrmEntity();
-    // Set internal ID if it exists (for updates)
-    if (domain.internalId) {
-      orm.id = Number(domain.internalId);
+    // Preserve id if it exists (for updates)
+    if (domain.id !== null) {
+      orm.id = domain.id;
     }
-    orm.uuid = domain.id;
     orm.name = domain.name;
     orm.email = domain.email;
     orm.admissionDate = domain.admissionDate;
     orm.project = domain.project;
     orm.role = domain.role;
     orm.teamLeader = domain.teamLeader;
-    orm.clientId = Number(domain.clientId);
+    orm.clientId = domain.clientId;
     orm.status = domain.status;
     orm.riskLevel = domain.riskLevel;
     orm.createdAt = domain.createdAt;

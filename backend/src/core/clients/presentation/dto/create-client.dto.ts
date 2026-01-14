@@ -12,4 +12,3 @@ export class CreateClientDto {
     return new CreateClientCommand(this.name);
   }
 }
-

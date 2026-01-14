@@ -1,5 +1,4 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import type { IEvaluationAssignmentRepository } from '../../domain/repositories/evaluation-assignment.repository.interface';
 import type { IMilestoneResultRepository } from '../../domain/repositories/milestone-result.repository.interface';
 import type { IEvaluationTemplateRepository } from '../../domain/repositories/evaluation-template.repository.interface';
@@ -28,7 +27,7 @@ export class CalculateMilestoneResultUseCase {
   ) {}
 
   async execute(
-    collaboratorId: string,
+    collaboratorId: number,
     milestone: EvaluationMilestone,
   ): Promise<MilestoneResult | null> {
     this.logger.log(
@@ -36,13 +35,16 @@ export class CalculateMilestoneResultUseCase {
     );
 
     // Get all assignments for this collaborator and milestone
-    const assignments = await this.assignmentRepository.findByCollaboratorAndMilestone(
-      collaboratorId,
-      milestone,
-    );
+    const assignments =
+      await this.assignmentRepository.findByCollaboratorAndMilestone(
+        collaboratorId,
+        milestone,
+      );
 
     if (assignments.length === 0) {
-      this.logger.warn(`No assignments found for collaborator ${collaboratorId}, milestone ${milestone}`);
+      this.logger.warn(
+        `No assignments found for collaborator ${collaboratorId}, milestone ${milestone}`,
+      );
       return null;
     }
 
@@ -52,7 +54,9 @@ export class CalculateMilestoneResultUseCase {
     let teamLeaderAssignment: EvaluationAssignment | null = null;
 
     for (const assignment of assignments) {
-      const template = await this.templateRepository.findById(assignment.templateId);
+      const template = await this.templateRepository.findById(
+        assignment.templateId,
+      );
       if (template) {
         assignmentsWithRoles.push({
           assignment,
@@ -84,26 +88,28 @@ export class CalculateMilestoneResultUseCase {
     const calculationResult = strategy.calculate(assignmentsWithRoles);
 
     // Calculate risk level
-    // If strategy returns a determined risk level (like Month 1 strategy), use it.
-    // Otherwise fallback to the generic RiskCalculatorService
-    const riskLevel = calculationResult.determinedRiskLevel || RiskCalculatorService.calculateRiskFromScore(
-      calculationResult.finalScore,
-    );
+    const riskLevel =
+      calculationResult.determinedRiskLevel ||
+      RiskCalculatorService.calculateRiskFromScore(
+        calculationResult.finalScore,
+      );
 
     // Check if result already exists
-    const existingResult = await this.milestoneResultRepository.findByCollaboratorAndMilestone(
-      collaboratorId,
-      milestone,
-    );
+    const existingResult =
+      await this.milestoneResultRepository.findByCollaboratorAndMilestone(
+        collaboratorId,
+        milestone,
+      );
 
     if (existingResult) {
-      this.logger.warn(`Milestone result already exists for collaborator ${collaboratorId}, milestone ${milestone}`);
+      this.logger.warn(
+        `Milestone result already exists for collaborator ${collaboratorId}, milestone ${milestone}`,
+      );
       return existingResult;
     }
 
     // Create milestone result
     const milestoneResult = MilestoneResult.create(
-      uuidv4(),
       collaboratorId,
       milestone,
       collaboratorAssignment?.id || null,
@@ -113,7 +119,8 @@ export class CalculateMilestoneResultUseCase {
       calculationResult.calculationFormula,
     );
 
-    await this.milestoneResultRepository.save(milestoneResult);
+    const savedResult =
+      await this.milestoneResultRepository.save(milestoneResult);
 
     this.logger.log(
       `Milestone result calculated: score ${calculationResult.finalScore}, risk ${riskLevel}`,
@@ -121,14 +128,19 @@ export class CalculateMilestoneResultUseCase {
 
     // TRIGGER AUTOMATIC FOLLOW-UP PLAN ASSIGNMENT (Only for Month 1)
     if (milestone === EvaluationMilestone.MONTH_1) {
-      // We don't wait for this to complete, but we do catch errors
-      this.assignFollowUpPlanUseCase.execute(
-        new AssignFollowUpPlanCommand(collaboratorId, riskLevel)
-      ).catch(error => {
-         this.logger.error(`Failed to auto-assign follow-up plan: ${error.message}`, error.stack);
-      });
+      this.assignFollowUpPlanUseCase
+        .execute(new AssignFollowUpPlanCommand(collaboratorId, riskLevel))
+        .catch((error: unknown) => {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          const errorStack = error instanceof Error ? error.stack : undefined;
+          this.logger.error(
+            `Failed to auto-assign follow-up plan: ${errorMessage}`,
+            errorStack,
+          );
+        });
     }
 
-    return milestoneResult;
+    return savedResult;
   }
 }

@@ -43,7 +43,7 @@ export interface Question {
 }
 
 export interface EvaluationTemplate {
-  id: string;
+  id: number;
   milestone: EvaluationMilestone;
   targetRole: TargetRole;
   title: string;
@@ -61,10 +61,10 @@ export interface EvaluationAnswer {
 }
 
 export interface EvaluationAssignment {
-  id: string;
-  collaboratorId: string;
-  evaluatorUserId: string;
-  templateId: string;
+  id: number;
+  collaboratorId: number;
+  evaluatorUserId: number | null;
+  templateId: number;
   milestone: EvaluationMilestone;
   status: EvaluationStatus;
   dueDate: string;
@@ -88,7 +88,7 @@ export interface SubmitAssignmentPayload {
 
 export interface CompletedAssignmentResponse {
   assignment: {
-    id: string;
+    id: number;
     milestone: EvaluationMilestone;
     status: EvaluationStatus;
     score: number | null;
@@ -97,10 +97,9 @@ export interface CompletedAssignmentResponse {
     createdAt: string;
   };
   template: {
-    id: string;
+    id: number;
     title: string;
     milestone: EvaluationMilestone;
     questions: Question[];
   };
 }
-

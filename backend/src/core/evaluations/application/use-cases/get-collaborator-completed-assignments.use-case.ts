@@ -6,7 +6,7 @@ import { EvaluationStatus } from '../../domain/value-objects/evaluation-status.e
 
 export interface CompletedAssignmentResponse {
   assignment: {
-    id: string;
+    id: number | null;
     milestone: string;
     status: string;
     score: number | null;
@@ -15,7 +15,7 @@ export interface CompletedAssignmentResponse {
     createdAt: Date;
   };
   template: {
-    id: string;
+    id: number | null;
     title: string;
     milestone: string;
     questions: Array<{
@@ -36,7 +36,9 @@ export interface CompletedAssignmentResponse {
 
 @Injectable()
 export class GetCollaboratorCompletedAssignmentsUseCase {
-  private readonly logger = new Logger(GetCollaboratorCompletedAssignmentsUseCase.name);
+  private readonly logger = new Logger(
+    GetCollaboratorCompletedAssignmentsUseCase.name,
+  );
 
   constructor(
     @Inject('IEvaluationAssignmentRepository')
@@ -47,22 +49,22 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
     private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
-  async execute(collaboratorId: string): Promise<CompletedAssignmentResponse[]> {
-    this.logger.log(`Getting completed assignments for collaborator ${collaboratorId}`);
+  async execute(
+    collaboratorId: number,
+  ): Promise<CompletedAssignmentResponse[]> {
+    this.logger.log(
+      `Getting completed assignments for collaborator ${collaboratorId}`,
+    );
 
-    // collaboratorId is UUID - need to get internal ID for FK lookups
-    const collaborator = await this.collaboratorRepository.findById(collaboratorId);
+    const collaborator =
+      await this.collaboratorRepository.findById(collaboratorId);
     if (!collaborator) {
       throw new NotFoundException('Collaborator not found');
     }
-    if (!collaborator.internalId) {
-      throw new Error('Collaborator internal ID not available');
-    }
 
-    // Get all assignments for this collaborator using internal ID
-    const allAssignments = await this.assignmentRepository.findByCollaboratorId(collaborator.internalId);
+    const allAssignments =
+      await this.assignmentRepository.findByCollaboratorId(collaboratorId);
 
-    // Filter only completed assignments
     const completedAssignments = allAssignments.filter(
       (assignment) => assignment.status === EvaluationStatus.COMPLETED,
     );
@@ -70,8 +72,10 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
     const results: CompletedAssignmentResponse[] = [];
 
     for (const assignment of completedAssignments) {
-      const template = await this.templateRepository.findById(assignment.templateId);
-      
+      const template = await this.templateRepository.findById(
+        assignment.templateId,
+      );
+
       if (template) {
         results.push({
           assignment: {
@@ -91,12 +95,14 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
               id: q.id,
               text: q.text,
               dimensionId: q.dimensionId,
-              dimension: q.dimension ? {
-                id: q.dimension.id,
-                code: q.dimension.code,
-                name: q.dimension.name,
-                description: q.dimension.description,
-              } : undefined,
+              dimension: q.dimension
+                ? {
+                    id: q.dimension.id,
+                    code: q.dimension.code,
+                    name: q.dimension.name,
+                    description: q.dimension.description,
+                  }
+                : undefined,
               type: q.type,
               order: q.order,
             })),
@@ -105,14 +111,15 @@ export class GetCollaboratorCompletedAssignmentsUseCase {
       }
     }
 
-    // Sort by completed date (most recent first)
     results.sort((a, b) => {
       const dateA = a.assignment.completedAt?.getTime() || 0;
       const dateB = b.assignment.completedAt?.getTime() || 0;
       return dateB - dateA;
     });
 
-    this.logger.log(`Found ${results.length} completed assignment(s) for collaborator ${collaboratorId}`);
+    this.logger.log(
+      `Found ${results.length} completed assignment(s) for collaborator ${collaboratorId}`,
+    );
     return results;
   }
 }

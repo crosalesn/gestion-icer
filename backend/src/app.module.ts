@@ -30,10 +30,12 @@ import { FollowUpModule } from './core/follow-up/follow-up.module';
         database: configService.get<string>('DB_DATABASE'),
         options: {
           encrypt: configService.get<string>('DB_ENCRYPT', 'true') === 'true', // Para Azure SQL
-          trustServerCertificate: configService.get<string>('DB_TRUST_CERT', 'false') === 'true',
+          trustServerCertificate:
+            configService.get<string>('DB_TRUST_CERT', 'false') === 'true',
         },
         entities: [__dirname + '/**/*.orm-entity{.ts,.js}'],
-        synchronize: configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true', // Set to false in production
+        synchronize:
+          configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true', // Set to false in production
         namingStrategy: new SnakeNamingStrategy(),
       }),
     }),

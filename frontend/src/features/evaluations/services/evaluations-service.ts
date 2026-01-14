@@ -1,61 +1,15 @@
 import api from '../../../shared/services/api-client';
-import type { Evaluation, CreateEvaluationPayload, SubmitEvaluationPayload } from '../types/evaluation.types';
 import type { 
   PendingEvaluationResponse, 
   SubmitAssignmentPayload,
   EvaluationTemplate,
   EvaluationAssignment,
   CompletedAssignmentResponse,
+  EvaluationMilestone,
 } from '../types/template.types';
-import type { EvaluationMilestone } from '../types/template.types';
 import type { MilestoneResult } from '../types/milestone-result.types';
 
 const evaluationsService = {
-  // ==========================================
-  // DEPRECATED - Old evaluation system
-  // ==========================================
-  // Use assignEvaluation + submitAssignment instead
-  
-  /**
-   * @deprecated Use assignEvaluation instead
-   */
-  create: async (data: CreateEvaluationPayload) => {
-    const response = await api.post<Evaluation>('/evaluations', data);
-    return response.data;
-  },
-
-  /**
-   * @deprecated Use submitAssignment instead
-   */
-  submit: async (id: string, data: SubmitEvaluationPayload) => {
-    const response = await api.post<Evaluation>(`/evaluations/${id}/submit`, data);
-    return response.data;
-  },
-
-  /**
-   * @deprecated Legacy endpoint
-   */
-  getById: async (id: string) => {
-    const response = await api.get<Evaluation>(`/evaluations/${id}`);
-    return response.data;
-  },
-  
-  /**
-   * @deprecated Legacy endpoint
-   */
-  getByCollaborator: async (collaboratorId: string) => {
-    const response = await api.get<Evaluation[]>(`/evaluations/collaborator/${collaboratorId}`);
-    return response.data;
-  },
-
-  // ==========================================
-  // NEW TEMPLATE-BASED EVALUATION SYSTEM
-  // ==========================================
-
-  // ==========================================
-  // NEW TEMPLATE-BASED EVALUATION SYSTEM
-  // ==========================================
-  
   getAllPending: async (): Promise<PendingEvaluationResponse[]> => {
     const response = await api.get<PendingEvaluationResponse[]>('/evaluations/pending');
     return response.data;

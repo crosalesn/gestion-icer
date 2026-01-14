@@ -1,4 +1,3 @@
 export class DeleteCollaboratorCommand {
-  constructor(public readonly id: string) {}
+  constructor(public readonly id: number) {}
 }
-

@@ -1,5 +1,4 @@
 import { Inject, Injectable, ConflictException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import type { IActionPlanRepository } from '../../domain/repositories/action-plan.repository.interface';
 import { ActionPlan } from '../../domain/entities/action-plan.entity';
 import { AssignActionPlanCommand } from '../commands/assign-action-plan.command';
@@ -13,9 +12,10 @@ export class AssignActionPlanUseCase {
 
   async execute(command: AssignActionPlanCommand): Promise<ActionPlan> {
     // Check if there is already an active plan for this collaborator
-    const activePlan = await this.actionPlanRepository.findActiveByCollaboratorId(
-      command.collaboratorId,
-    );
+    const activePlan =
+      await this.actionPlanRepository.findActiveByCollaboratorId(
+        command.collaboratorId,
+      );
 
     if (activePlan) {
       throw new ConflictException(
@@ -23,9 +23,7 @@ export class AssignActionPlanUseCase {
       );
     }
 
-    const id = uuidv4();
     const actionPlan = ActionPlan.create(
-      id,
       command.collaboratorId,
       command.type,
       command.description,
@@ -33,9 +31,8 @@ export class AssignActionPlanUseCase {
       command.dueDate,
     );
 
-    await this.actionPlanRepository.save(actionPlan);
+    const savedActionPlan = await this.actionPlanRepository.save(actionPlan);
 
-    return actionPlan;
+    return savedActionPlan;
   }
 }
-

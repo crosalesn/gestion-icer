@@ -8,4 +8,3 @@ export class CreateUserCommand {
     public readonly role: UserRole,
   ) {}
 }
-

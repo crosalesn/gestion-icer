@@ -13,4 +13,3 @@ export class FindAllUsersUseCase {
     return this.userRepository.findAll();
   }
 }
-

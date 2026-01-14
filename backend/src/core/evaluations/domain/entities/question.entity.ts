@@ -9,6 +9,7 @@ export class Question {
     private readonly _type: QuestionType,
     private readonly _order: number,
     private readonly _required: boolean,
+    private readonly _isActive: boolean = true,
     private readonly _dimension?: Dimension,
   ) {}
 
@@ -40,15 +41,18 @@ export class Question {
     return this._required;
   }
 
+  get isActive(): boolean {
+    return this._isActive;
+  }
+
   static create(
-    id: string,
     text: string,
     dimensionId: string,
     type: QuestionType,
     order: number,
     required: boolean,
   ): Question {
-    return new Question(id, text, dimensionId, type, order, required);
+    return new Question('', text, dimensionId, type, order, required, true);
   }
 
   static reconstitute(
@@ -58,8 +62,18 @@ export class Question {
     type: QuestionType,
     order: number,
     required: boolean,
+    isActive: boolean = true,
     dimension?: Dimension,
   ): Question {
-    return new Question(id, text, dimensionId, type, order, required, dimension);
+    return new Question(
+      id,
+      text,
+      dimensionId,
+      type,
+      order,
+      required,
+      isActive,
+      dimension,
+    );
   }
 }

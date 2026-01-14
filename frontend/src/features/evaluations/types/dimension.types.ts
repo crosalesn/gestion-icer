@@ -1,5 +1,5 @@
 export interface Dimension {
-  id: string;
+  id: number;
   code: string;
   name: string;
   description: string | null;
@@ -22,4 +22,3 @@ export interface UpdateDimensionPayload {
   order?: number;
   isActive?: boolean;
 }
-

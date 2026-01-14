@@ -2,8 +2,7 @@ import { EvaluationAnswer } from '../../domain/entities/evaluation-assignment.en
 
 export class SubmitAssignmentAnswersCommand {
   constructor(
-    public readonly assignmentId: string,
+    public readonly assignmentId: number,
     public readonly answers: EvaluationAnswer[],
   ) {}
 }
-

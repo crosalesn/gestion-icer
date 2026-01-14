@@ -8,10 +8,10 @@ export interface EvaluationAnswer {
 
 export class EvaluationAssignment {
   constructor(
-    private readonly _id: string,
-    private readonly _collaboratorId: string,
-    private readonly _evaluatorUserId: string | null,
-    private readonly _templateId: string,
+    private _id: number | null, // null for new entities, assigned by DB after save
+    private readonly _collaboratorId: number,
+    private readonly _evaluatorUserId: number | null,
+    private readonly _templateId: number,
     private readonly _milestone: EvaluationMilestone,
     private _status: EvaluationStatus,
     private readonly _dueDate: Date,
@@ -22,19 +22,19 @@ export class EvaluationAssignment {
     private _updatedAt: Date,
   ) {}
 
-  get id(): string {
+  get id(): number | null {
     return this._id;
   }
 
-  get collaboratorId(): string {
+  get collaboratorId(): number {
     return this._collaboratorId;
   }
 
-  get evaluatorUserId(): string | null {
+  get evaluatorUserId(): number | null {
     return this._evaluatorUserId;
   }
 
-  get templateId(): string {
+  get templateId(): number {
     return this._templateId;
   }
 
@@ -70,17 +70,17 @@ export class EvaluationAssignment {
     return this._updatedAt;
   }
 
+  // Factory method (id will be assigned by DB)
   static create(
-    id: string,
-    collaboratorId: string,
-    templateId: string,
+    collaboratorId: number,
+    templateId: number,
     milestone: EvaluationMilestone,
     dueDate: Date,
-    evaluatorUserId: string | null = null,
+    evaluatorUserId: number | null = null,
   ): EvaluationAssignment {
     const now = new Date();
     return new EvaluationAssignment(
-      id,
+      null, // id is null for new entities
       collaboratorId,
       evaluatorUserId,
       templateId,
@@ -96,10 +96,10 @@ export class EvaluationAssignment {
   }
 
   static reconstitute(
-    id: string,
-    collaboratorId: string,
-    evaluatorUserId: string | null,
-    templateId: string,
+    id: number,
+    collaboratorId: number,
+    evaluatorUserId: number | null,
+    templateId: number,
     milestone: EvaluationMilestone,
     status: EvaluationStatus,
     dueDate: Date,
@@ -144,4 +144,3 @@ export class EvaluationAssignment {
     this._updatedAt = new Date();
   }
 }
-

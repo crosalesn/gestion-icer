@@ -1,5 +1,4 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { AssignEvaluationCommand } from '../commands/assign-evaluation.command';
 import { EvaluationAssignment } from '../../domain/entities/evaluation-assignment.entity';
 import type { IEvaluationAssignmentRepository } from '../../domain/repositories/evaluation-assignment.repository.interface';
@@ -21,7 +20,9 @@ export class AssignEvaluationUseCase {
     private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
-  async execute(command: AssignEvaluationCommand): Promise<EvaluationAssignment[]> {
+  async execute(
+    command: AssignEvaluationCommand,
+  ): Promise<EvaluationAssignment[]> {
     this.logger.log(
       `Assigning evaluation for collaborator ${command.collaboratorId}, milestone ${command.milestone}`,
     );
@@ -33,30 +34,26 @@ export class AssignEvaluationUseCase {
       throw new Error('Collaborator not found');
     }
 
-    // Get the internal numeric ID for FK relations
-    const collaboratorInternalId = collaborator.internalId;
-    if (!collaboratorInternalId) {
-      throw new Error('Collaborator internal ID not available');
-    }
-
     // Determine required roles based on milestone
     const requiredRoles = this.getRequiredRolesForMilestone(command.milestone);
 
-    // Fetch existing assignments using internal ID (numeric)
-    const existingAssignments = await this.assignmentRepository.findByCollaboratorAndMilestone(
-      collaboratorInternalId,
-      command.milestone,
-    );
+    // Fetch existing assignments
+    const existingAssignments =
+      await this.assignmentRepository.findByCollaboratorAndMilestone(
+        command.collaboratorId,
+        command.milestone,
+      );
 
     const newAssignments: EvaluationAssignment[] = [];
     const allAssignments = [...existingAssignments];
 
     for (const role of requiredRoles) {
       // Find active template for this milestone and role
-      const template = await this.templateRepository.findActiveByMilestoneAndRole(
-        command.milestone,
-        role,
-      );
+      const template =
+        await this.templateRepository.findActiveByMilestoneAndRole(
+          command.milestone,
+          role,
+        );
 
       if (!template) {
         this.logger.error(
@@ -78,20 +75,22 @@ export class AssignEvaluationUseCase {
       }
 
       // Create new assignment
-      const dueDate = this.calculateDueDate(command.milestone, collaborator.admissionDate);
+      const dueDate = this.calculateDueDate(
+        command.milestone,
+        collaborator.admissionDate,
+      );
 
       const assignment = EvaluationAssignment.create(
-        uuidv4(),
-        collaboratorInternalId,
-        template.id,
+        command.collaboratorId,
+        template.id!,
         command.milestone,
         dueDate,
         null, // No specific evaluator - any user can complete this (or role based)
       );
 
-      await this.assignmentRepository.save(assignment);
-      newAssignments.push(assignment);
-      allAssignments.push(assignment);
+      const savedAssignment = await this.assignmentRepository.save(assignment);
+      newAssignments.push(savedAssignment);
+      allAssignments.push(savedAssignment);
     }
 
     this.logger.log(
@@ -100,7 +99,9 @@ export class AssignEvaluationUseCase {
     return allAssignments;
   }
 
-  private getRequiredRolesForMilestone(milestone: EvaluationMilestone): TargetRole[] {
+  private getRequiredRolesForMilestone(
+    milestone: EvaluationMilestone,
+  ): TargetRole[] {
     switch (milestone) {
       case EvaluationMilestone.DAY_1:
         return [TargetRole.COLLABORATOR];
@@ -112,7 +113,10 @@ export class AssignEvaluationUseCase {
     }
   }
 
-  private calculateDueDate(milestone: EvaluationMilestone, admissionDate: Date): Date {
+  private calculateDueDate(
+    milestone: EvaluationMilestone,
+    admissionDate: Date,
+  ): Date {
     const dueDate = new Date(admissionDate);
     switch (milestone) {
       case EvaluationMilestone.DAY_1:
@@ -128,4 +132,3 @@ export class AssignEvaluationUseCase {
     return dueDate;
   }
 }
-

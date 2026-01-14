@@ -24,7 +24,8 @@ export class CreateQuestionDto {
   text: string;
 
   @ApiProperty({
-    description: 'ID de la dimensión ICER de la pregunta (ID numérico como string)',
+    description:
+      'ID de la dimensión ICER de la pregunta (ID numérico como string)',
     example: '1',
   })
   @IsString()

@@ -8,44 +8,42 @@ import { MilestoneResultMapper } from './milestone-result.mapper';
 import { EvaluationMilestone } from '../../domain/value-objects/evaluation-milestone.enum';
 
 @Injectable()
-export class PostgresMilestoneResultRepository
-  implements IMilestoneResultRepository
-{
+export class PostgresMilestoneResultRepository implements IMilestoneResultRepository {
   constructor(
     @InjectRepository(MilestoneResultOrmEntity)
     private readonly repository: Repository<MilestoneResultOrmEntity>,
   ) {}
 
-  async save(result: MilestoneResult): Promise<void> {
+  async save(result: MilestoneResult): Promise<MilestoneResult> {
     const ormEntity = MilestoneResultMapper.toOrm(result);
-    await this.repository.save(ormEntity);
+    const saved = await this.repository.save(ormEntity);
+    return MilestoneResultMapper.toDomain(saved);
   }
 
-  async findById(id: string): Promise<MilestoneResult | null> {
+  async findById(id: number): Promise<MilestoneResult | null> {
     const ormEntity = await this.repository.findOne({
-      where: { id: Number(id) },
+      where: { id },
     });
     return ormEntity ? MilestoneResultMapper.toDomain(ormEntity) : null;
   }
 
   async findByCollaboratorId(
-    collaboratorId: string,
+    collaboratorId: number,
   ): Promise<MilestoneResult[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId: Number(collaboratorId) },
+      where: { collaboratorId },
       order: { calculatedAt: 'ASC' },
     });
     return ormEntities.map((orm) => MilestoneResultMapper.toDomain(orm));
   }
 
   async findByCollaboratorAndMilestone(
-    collaboratorId: string,
+    collaboratorId: number,
     milestone: EvaluationMilestone,
   ): Promise<MilestoneResult | null> {
     const ormEntity = await this.repository.findOne({
-      where: { collaboratorId: Number(collaboratorId), milestone },
+      where: { collaboratorId, milestone },
     });
     return ormEntity ? MilestoneResultMapper.toDomain(ormEntity) : null;
   }
 }
-

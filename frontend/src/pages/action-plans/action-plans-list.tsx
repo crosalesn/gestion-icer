@@ -90,7 +90,7 @@ const ActionPlansList = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         {getStatusBadge(plan.status)}
-                        <span className="text-xs text-gray-400 font-mono">ID: {(plan.id || '').slice(0, 8)}</span>
+                        <span className="text-xs text-gray-400 font-mono">ID: {String(plan.id || '').slice(0, 8)}</span>
                       </div>
                       
                       <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">

@@ -16,4 +16,3 @@ export class GetAllTemplatesUseCase {
     return this.templateRepository.findAll();
   }
 }
-

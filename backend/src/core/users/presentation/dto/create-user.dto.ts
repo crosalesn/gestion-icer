@@ -1,4 +1,10 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { CreateUserCommand } from '../../application/commands/create-user.command';
 
@@ -21,7 +27,11 @@ export class CreateUserDto {
   role: UserRole;
 
   toCommand(): CreateUserCommand {
-    return new CreateUserCommand(this.name, this.email, this.password, this.role);
+    return new CreateUserCommand(
+      this.name,
+      this.email,
+      this.password,
+      this.role,
+    );
   }
 }
-

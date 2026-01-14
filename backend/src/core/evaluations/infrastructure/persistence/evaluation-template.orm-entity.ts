@@ -35,7 +35,6 @@ export class EvaluationTemplateOrmEntity {
   description: string | null;
 
   @OneToMany(() => QuestionOrmEntity, (question) => question.template, {
-    cascade: true,
     eager: true,
   })
   questions: QuestionOrmEntity[];
@@ -52,4 +51,3 @@ export class EvaluationTemplateOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

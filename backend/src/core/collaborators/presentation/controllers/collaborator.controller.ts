@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Post, Put, Delete, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCollaboratorUseCase } from '../../application/use-cases/create-collaborator.use-case';
 import { FindAllCollaboratorsUseCase } from '../../application/use-cases/find-all-collaborators.use-case';
@@ -26,18 +38,20 @@ export class CollaboratorController {
 
   @Post()
   async create(@Body() dto: CreateCollaboratorDto) {
-    const result = await this.createCollaboratorUseCase.execute(dto.toCommand());
+    const result = await this.createCollaboratorUseCase.execute(
+      dto.toCommand(),
+    );
     return {
-      id: String(result.id),
-      name: String(result.name),
-      email: String(result.email),
+      id: result.id,
+      name: result.name,
+      email: result.email,
       admissionDate: formatDateOnly(result.admissionDate),
-      project: String(result.project),
-      role: String(result.role),
-      teamLeader: String(result.teamLeader),
-      clientId: result.clientId ? String(result.clientId) : null,
-      status: String(result.status),
-      riskLevel: String(result.riskLevel),
+      project: result.project,
+      role: result.role,
+      teamLeader: result.teamLeader,
+      clientId: result.clientId,
+      status: result.status,
+      riskLevel: result.riskLevel,
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
     };
@@ -46,56 +60,61 @@ export class CollaboratorController {
   @Get()
   async findAll() {
     const result = await this.findAllCollaboratorsUseCase.execute();
-    
-    return result.map(c => ({
-      id: String(c.id),
-      name: String(c.name),
-      email: String(c.email),
+
+    return result.map((c) => ({
+      id: c.id,
+      name: c.name,
+      email: c.email,
       admissionDate: formatDateOnly(c.admissionDate),
-      project: String(c.project),
-      role: String(c.role),
-      teamLeader: String(c.teamLeader),
-      clientId: c.clientId ? String(c.clientId) : null,
-      status: String(c.status),
-      riskLevel: String(c.riskLevel || 'NONE'),
+      project: c.project,
+      role: c.role,
+      teamLeader: c.teamLeader,
+      clientId: c.clientId,
+      status: c.status,
+      riskLevel: c.riskLevel || 'NONE',
       createdAt: c.createdAt.toISOString(),
       updatedAt: c.updatedAt.toISOString(),
     }));
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     const result = await this.findCollaboratorByIdUseCase.execute(id);
     return {
-      id: String(result.id),
-      name: String(result.name),
-      email: String(result.email),
+      id: result.id,
+      name: result.name,
+      email: result.email,
       admissionDate: formatDateOnly(result.admissionDate),
-      project: String(result.project),
-      role: String(result.role),
-      teamLeader: String(result.teamLeader),
-      clientId: result.clientId ? String(result.clientId) : null,
-      status: String(result.status),
-      riskLevel: String(result.riskLevel || 'NONE'),
+      project: result.project,
+      role: result.role,
+      teamLeader: result.teamLeader,
+      clientId: result.clientId,
+      status: result.status,
+      riskLevel: result.riskLevel || 'NONE',
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
     };
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateCollaboratorDto) {
-    const result = await this.updateCollaboratorUseCase.execute(dto.toCommand(id));
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCollaboratorDto,
+  ) {
+    const result = await this.updateCollaboratorUseCase.execute(
+      dto.toCommand(id),
+    );
     return {
-      id: String(result.id),
-      name: String(result.name),
-      email: String(result.email),
+      id: result.id,
+      name: result.name,
+      email: result.email,
       admissionDate: formatDateOnly(result.admissionDate),
-      project: String(result.project),
-      role: String(result.role),
-      teamLeader: String(result.teamLeader),
-      clientId: result.clientId ? String(result.clientId) : null,
-      status: String(result.status),
-      riskLevel: String(result.riskLevel),
+      project: result.project,
+      role: result.role,
+      teamLeader: result.teamLeader,
+      clientId: result.clientId,
+      status: result.status,
+      riskLevel: result.riskLevel,
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
     };
@@ -103,7 +122,7 @@ export class CollaboratorController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     const command = new DeleteCollaboratorCommand(id);
     await this.deleteCollaboratorUseCase.execute(command);
   }

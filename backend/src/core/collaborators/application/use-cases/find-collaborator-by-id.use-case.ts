@@ -9,7 +9,7 @@ export class FindCollaboratorByIdUseCase {
     private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
-  async execute(id: string): Promise<Collaborator> {
+  async execute(id: number): Promise<Collaborator> {
     const collaborator = await this.collaboratorRepository.findById(id);
     if (!collaborator) {
       throw new NotFoundException(`Collaborator with ID ${id} not found`);
@@ -17,4 +17,3 @@ export class FindCollaboratorByIdUseCase {
     return collaborator;
   }
 }
-

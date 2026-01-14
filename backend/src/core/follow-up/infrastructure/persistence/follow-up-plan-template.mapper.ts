@@ -2,7 +2,9 @@ import { FollowUpPlanTemplate } from '../../domain/entities/follow-up-plan-templ
 import { FollowUpPlanTemplateOrmEntity } from './follow-up-plan-template.orm-entity';
 
 export class FollowUpPlanTemplateMapper {
-  static toDomain(ormEntity: FollowUpPlanTemplateOrmEntity): FollowUpPlanTemplate {
+  static toDomain(
+    ormEntity: FollowUpPlanTemplateOrmEntity,
+  ): FollowUpPlanTemplate {
     return new FollowUpPlanTemplate(
       String(ormEntity.id),
       ormEntity.name,
@@ -17,7 +19,9 @@ export class FollowUpPlanTemplateMapper {
     );
   }
 
-  static toPersistence(domainEntity: FollowUpPlanTemplate): FollowUpPlanTemplateOrmEntity {
+  static toPersistence(
+    domainEntity: FollowUpPlanTemplate,
+  ): FollowUpPlanTemplateOrmEntity {
     const ormEntity = new FollowUpPlanTemplateOrmEntity();
     if (domainEntity.id) {
       ormEntity.id = Number(domainEntity.id);
@@ -34,4 +38,3 @@ export class FollowUpPlanTemplateMapper {
     return ormEntity;
   }
 }
-

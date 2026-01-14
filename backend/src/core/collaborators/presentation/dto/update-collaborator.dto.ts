@@ -1,4 +1,11 @@
-import { IsString, IsEmail, IsDateString, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { UpdateCollaboratorCommand } from '../../application/commands/update-collaborator.command';
 import { parseDateOnly } from '../../../../common/utils/date.utils';
 
@@ -27,11 +34,11 @@ export class UpdateCollaboratorDto {
   @IsNotEmpty()
   teamLeader: string;
 
-  @IsString()
-  @IsNotEmpty()
-  clientId: string;
+  @IsNumber()
+  @Type(() => Number)
+  clientId: number;
 
-  toCommand(id: string): UpdateCollaboratorCommand {
+  toCommand(id: number): UpdateCollaboratorCommand {
     return new UpdateCollaboratorCommand(
       id,
       this.name,
@@ -44,4 +51,3 @@ export class UpdateCollaboratorDto {
     );
   }
 }
-

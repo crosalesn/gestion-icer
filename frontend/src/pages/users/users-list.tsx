@@ -54,7 +54,7 @@ const UsersList = () => {
       return [];
     }
 
-    let filtered = users.filter(u => {
+    const filtered = users.filter(u => {
       if (!u) return false;
       
       const matchesSearch = 

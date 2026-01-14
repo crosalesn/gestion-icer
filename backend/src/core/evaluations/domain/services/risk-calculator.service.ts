@@ -8,4 +8,3 @@ export class RiskCalculatorService {
     return RiskLevel.NONE;
   }
 }
-

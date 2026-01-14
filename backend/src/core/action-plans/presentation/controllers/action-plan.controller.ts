@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AssignActionPlanUseCase } from '../../application/use-cases/assign-action-plan.use-case';
@@ -32,19 +33,16 @@ export class ActionPlanController {
 
   @Post('collaborator/:collaboratorId')
   async assign(
-    @Param('collaboratorId') collaboratorId: string,
+    @Param('collaboratorId', ParseIntPipe) collaboratorId: number,
     @Body() dto: AssignActionPlanDto,
   ): Promise<ActionPlan> {
-    return this.assignActionPlanUseCase.execute(
-      dto.toCommand(collaboratorId),
-    );
+    return this.assignActionPlanUseCase.execute(dto.toCommand(collaboratorId));
   }
 
   @Get('collaborator/:collaboratorId')
   async getByCollaborator(
-    @Param('collaboratorId') collaboratorId: string,
+    @Param('collaboratorId', ParseIntPipe) collaboratorId: number,
   ): Promise<ActionPlan[]> {
     return this.getCollaboratorActionPlansUseCase.execute(collaboratorId);
   }
 }
-

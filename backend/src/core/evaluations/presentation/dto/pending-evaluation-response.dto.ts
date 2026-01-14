@@ -7,16 +7,16 @@ import { TemplateResponseDto } from './template-response.dto';
 
 export class EvaluationAssignmentResponseDto {
   @ApiProperty()
-  id: string;
+  id: number | null;
 
   @ApiProperty()
-  collaboratorId: string;
+  collaboratorId: number;
 
   @ApiProperty({ required: false, nullable: true })
-  evaluatorUserId: string | null;
+  evaluatorUserId: number | null;
 
   @ApiProperty()
-  templateId: string;
+  templateId: number;
 
   @ApiProperty({ enum: EvaluationMilestone })
   milestone: EvaluationMilestone;
@@ -42,7 +42,9 @@ export class EvaluationAssignmentResponseDto {
   @ApiProperty()
   updatedAt: Date;
 
-  static fromDomain(assignment: EvaluationAssignment): EvaluationAssignmentResponseDto {
+  static fromDomain(
+    assignment: EvaluationAssignment,
+  ): EvaluationAssignmentResponseDto {
     const dto = new EvaluationAssignmentResponseDto();
     dto.id = assignment.id;
     dto.collaboratorId = assignment.collaboratorId;
@@ -87,4 +89,3 @@ export class PendingEvaluationResponseDto {
     return dto;
   }
 }
-

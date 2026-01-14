@@ -12,9 +12,6 @@ export class UserOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
-  uuid: string;
-
   @Column()
   name: string;
 
@@ -40,4 +37,3 @@ export class UserOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

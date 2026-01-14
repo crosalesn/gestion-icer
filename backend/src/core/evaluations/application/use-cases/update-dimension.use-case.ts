@@ -15,14 +15,18 @@ export class UpdateDimensionUseCase {
   async execute(command: UpdateDimensionCommand): Promise<Dimension> {
     this.logger.log(`Updating dimension ${command.id}`);
 
-    const existingDimension = await this.dimensionRepository.findById(command.id);
+    const existingDimension = await this.dimensionRepository.findById(
+      command.id,
+    );
     if (!existingDimension) {
       throw new Error('Dimension not found');
     }
 
     // Check if code is being changed and if it already exists
     if (command.code && command.code !== existingDimension.code) {
-      const existingByCode = await this.dimensionRepository.findByCode(command.code);
+      const existingByCode = await this.dimensionRepository.findByCode(
+        command.code,
+      );
       if (existingByCode) {
         throw new Error(`Dimension with code ${command.code} already exists`);
       }
@@ -33,9 +37,13 @@ export class UpdateDimensionUseCase {
       existingDimension.id,
       command.code ?? existingDimension.code,
       command.name ?? existingDimension.name,
-      command.description !== undefined ? command.description : existingDimension.description,
+      command.description !== undefined
+        ? command.description
+        : existingDimension.description,
       command.order ?? existingDimension.order,
-      command.isActive !== undefined ? command.isActive : existingDimension.isActive,
+      command.isActive !== undefined
+        ? command.isActive
+        : existingDimension.isActive,
     );
 
     await this.dimensionRepository.save(updatedDimension);
@@ -50,4 +58,3 @@ export class UpdateDimensionUseCase {
     return savedDimension;
   }
 }
-

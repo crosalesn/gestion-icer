@@ -29,7 +29,9 @@ export class Month1CalculationStrategy implements ICalculationStrategy {
 
   calculate(assignments: AssignmentWithRole[]): CalculationResult {
     if (!this.canCalculate(assignments)) {
-      throw new Error('Cannot calculate Month 1 result: missing required scored evaluations');
+      throw new Error(
+        'Cannot calculate Month 1 result: missing required scored evaluations',
+      );
     }
 
     const collaboratorAssignment = assignments.find(

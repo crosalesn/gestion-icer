@@ -9,50 +9,49 @@ import { EvaluationMilestone } from '../../domain/value-objects/evaluation-miles
 import { EvaluationStatus } from '../../domain/value-objects/evaluation-status.enum';
 
 @Injectable()
-export class PostgresEvaluationAssignmentRepository
-  implements IEvaluationAssignmentRepository
-{
+export class PostgresEvaluationAssignmentRepository implements IEvaluationAssignmentRepository {
   constructor(
     @InjectRepository(EvaluationAssignmentOrmEntity)
     private readonly repository: Repository<EvaluationAssignmentOrmEntity>,
   ) {}
 
-  async save(assignment: EvaluationAssignment): Promise<void> {
+  async save(assignment: EvaluationAssignment): Promise<EvaluationAssignment> {
     const ormEntity = EvaluationAssignmentMapper.toOrm(assignment);
-    await this.repository.save(ormEntity);
+    const saved = await this.repository.save(ormEntity);
+    return EvaluationAssignmentMapper.toDomain(saved);
   }
 
-  async findById(id: string): Promise<EvaluationAssignment | null> {
-    const ormEntity = await this.repository.findOne({ where: { uuid: id } });
+  async findById(id: number): Promise<EvaluationAssignment | null> {
+    const ormEntity = await this.repository.findOne({ where: { id } });
     return ormEntity ? EvaluationAssignmentMapper.toDomain(ormEntity) : null;
   }
 
   async findByCollaboratorId(
-    collaboratorId: string,
+    collaboratorId: number,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId: Number(collaboratorId) },
+      where: { collaboratorId },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationAssignmentMapper.toDomain(orm));
   }
 
   async findByEvaluatorUserId(
-    evaluatorUserId: string,
+    evaluatorUserId: number,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
-      where: { evaluatorUserId: Number(evaluatorUserId) },
+      where: { evaluatorUserId },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationAssignmentMapper.toDomain(orm));
   }
 
   async findPendingByEvaluatorUserId(
-    evaluatorUserId: string,
+    evaluatorUserId: number,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
       where: {
-        evaluatorUserId: Number(evaluatorUserId),
+        evaluatorUserId,
         status: EvaluationStatus.PENDING,
       },
       order: { dueDate: 'ASC' },
@@ -71,14 +70,13 @@ export class PostgresEvaluationAssignmentRepository
   }
 
   async findByCollaboratorAndMilestone(
-    collaboratorId: string,
+    collaboratorId: number,
     milestone: EvaluationMilestone,
   ): Promise<EvaluationAssignment[]> {
     const ormEntities = await this.repository.find({
-      where: { collaboratorId: Number(collaboratorId), milestone },
+      where: { collaboratorId, milestone },
       order: { createdAt: 'ASC' },
     });
     return ormEntities.map((orm) => EvaluationAssignmentMapper.toDomain(orm));
   }
 }
-

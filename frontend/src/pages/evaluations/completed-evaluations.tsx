@@ -10,9 +10,9 @@ interface CompletedEvaluationsProps {
 }
 
 const CompletedEvaluations = ({ evaluations, loading }: CompletedEvaluationsProps) => {
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
-  const toggleExpand = (id: string) => {
+  const toggleExpand = (id: number) => {
     setExpandedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {

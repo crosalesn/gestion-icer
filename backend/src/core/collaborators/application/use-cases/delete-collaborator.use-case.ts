@@ -24,4 +24,3 @@ export class DeleteCollaboratorUseCase {
     this.logger.log(`Collaborator ${command.id} deleted successfully`);
   }
 }
-

@@ -9,12 +9,13 @@ export class GetTemplateByIdUseCase {
     private readonly templateRepository: IEvaluationTemplateRepository,
   ) {}
 
-  async execute(id: string): Promise<EvaluationTemplate> {
+  async execute(id: number): Promise<EvaluationTemplate> {
     const template = await this.templateRepository.findById(id);
     if (!template) {
-      throw new NotFoundException(`Evaluation template with ID ${id} not found`);
+      throw new NotFoundException(
+        `Evaluation template with ID ${id} not found`,
+      );
     }
     return template;
   }
 }
-

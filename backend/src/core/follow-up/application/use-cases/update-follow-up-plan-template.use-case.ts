@@ -10,7 +10,10 @@ export class UpdateFollowUpPlanTemplateUseCase {
     private readonly repository: IFollowUpPlanTemplateRepository,
   ) {}
 
-  async execute(id: string, dto: UpdateFollowUpPlanTemplateDto): Promise<FollowUpPlanTemplate> {
+  async execute(
+    id: string,
+    dto: UpdateFollowUpPlanTemplateDto,
+  ): Promise<FollowUpPlanTemplate> {
     const template = await this.repository.findById(id);
     if (!template) {
       throw new Error(`Template with ID ${id} not found`);
@@ -28,13 +31,13 @@ export class UpdateFollowUpPlanTemplateUseCase {
     if (dto.code) template.code = dto.code;
     if (dto.targetRiskLevel) template.targetRiskLevel = dto.targetRiskLevel;
     if (dto.durationDays) template.durationDays = dto.durationDays;
-    if (dto.meetingFrequencyDays) template.meetingFrequencyDays = dto.meetingFrequencyDays;
+    if (dto.meetingFrequencyDays)
+      template.meetingFrequencyDays = dto.meetingFrequencyDays;
     if (dto.meetingCount) template.meetingCount = dto.meetingCount;
     if (dto.description !== undefined) template.description = dto.description;
-    
+
     template.updatedAt = new Date();
 
     return this.repository.update(template);
   }
 }
-

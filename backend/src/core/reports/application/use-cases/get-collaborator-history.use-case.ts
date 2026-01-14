@@ -1,15 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { ICollaboratorRepository } from '../../../collaborators/domain/repositories/collaborator.repository.interface';
-import type { IEvaluationRepository } from '../../../evaluations/domain/repositories/evaluation.repository.interface';
 import type { IEvaluationAssignmentRepository } from '../../../evaluations/domain/repositories/evaluation-assignment.repository.interface';
 import type { IActionPlanRepository } from '../../../action-plans/domain/repositories/action-plan.repository.interface';
-import { EvaluationMilestone } from '../../../evaluations/domain/value-objects/evaluation-milestone.enum';
-import { EvaluationType } from '../../../evaluations/domain/value-objects/evaluation-type.enum';
 import { formatDateOnly } from '../../../../common/utils/date.utils';
 
 export interface CollaboratorHistoryReport {
   collaborator: {
-    id: string;
+    id: number | null;
     name: string;
     role: string;
     project: string;
@@ -18,14 +15,15 @@ export interface CollaboratorHistoryReport {
     status: string;
   };
   evaluations: {
-    id: string;
+    id: number | null;
     type: string;
     score: number | null;
     status: string;
-    date: string;
+    createdAt: string;
+    completedAt: string | null;
   }[];
   activeActionPlan: {
-    id: string;
+    id: number | null;
     type: string;
     description: string;
     dueDate: string;
@@ -37,60 +35,36 @@ export class GetCollaboratorHistoryUseCase {
   constructor(
     @Inject('ICollaboratorRepository')
     private readonly collaboratorRepository: ICollaboratorRepository,
-    @Inject('IEvaluationRepository')
-    private readonly evaluationRepository: IEvaluationRepository,
     @Inject('IEvaluationAssignmentRepository')
     private readonly assignmentRepository: IEvaluationAssignmentRepository,
     @Inject('IActionPlanRepository')
     private readonly actionPlanRepository: IActionPlanRepository,
   ) {}
 
-  async execute(collaboratorId: string): Promise<CollaboratorHistoryReport> {
-    // collaboratorId is the UUID (public identifier)
-    const collaborator = await this.collaboratorRepository.findById(
-      collaboratorId,
-    );
+  async execute(collaboratorId: number): Promise<CollaboratorHistoryReport> {
+    const collaborator =
+      await this.collaboratorRepository.findById(collaboratorId);
 
     if (!collaborator) {
       throw new NotFoundException('Collaborator not found');
     }
 
-    // Use internal ID (numeric) for repository queries with FK relationships
-    const internalId = collaborator.internalId;
-    if (!internalId) {
-      throw new Error('Collaborator internal ID not available');
-    }
+    const assignments =
+      await this.assignmentRepository.findByCollaboratorId(collaboratorId);
 
-    const evaluations = await this.evaluationRepository.findByCollaboratorId(
-      internalId,
-    );
-
-    const assignments = await this.assignmentRepository.findByCollaboratorId(
-      internalId,
-    );
-
-    const mappedAssignments = assignments.map((a) => ({
+    const evaluations = assignments.map((a) => ({
       id: a.id,
-      type: this.mapMilestoneToType(a.milestone),
+      type: a.milestone,
       score: a.score,
       status: a.status,
-      date: formatDateOnly(a.completedAt || a.createdAt),
+      createdAt: formatDateOnly(a.createdAt),
+      completedAt: a.completedAt ? formatDateOnly(a.completedAt) : null,
     }));
 
-    const allEvaluations = [
-      ...evaluations.map((e) => ({
-        id: e.id,
-        type: e.type,
-        score: e.score,
-        status: e.status,
-        date: formatDateOnly(e.completedAt || e.createdAt),
-      })),
-      ...mappedAssignments,
-    ];
-
-    const activePlan = await this.actionPlanRepository.findActiveByCollaboratorId(
-      internalId,
-    );
+    const activePlan =
+      await this.actionPlanRepository.findActiveByCollaboratorId(
+        collaboratorId,
+      );
 
     return {
       collaborator: {
@@ -102,7 +76,7 @@ export class GetCollaboratorHistoryUseCase {
         riskLevel: collaborator.riskLevel,
         status: collaborator.status,
       },
-      evaluations: allEvaluations,
+      evaluations,
       activeActionPlan: activePlan
         ? {
             id: activePlan.id,
@@ -112,18 +86,5 @@ export class GetCollaboratorHistoryUseCase {
           }
         : null,
     };
-  }
-
-  private mapMilestoneToType(milestone: EvaluationMilestone): string {
-    switch (milestone) {
-      case EvaluationMilestone.DAY_1:
-        return EvaluationType.DAY_1;
-      case EvaluationMilestone.WEEK_1:
-        return EvaluationType.WEEK_1_COLLABORATOR;
-      case EvaluationMilestone.MONTH_1:
-        return EvaluationType.MONTH_1_COLLABORATOR;
-      default:
-        return milestone;
-    }
   }
 }

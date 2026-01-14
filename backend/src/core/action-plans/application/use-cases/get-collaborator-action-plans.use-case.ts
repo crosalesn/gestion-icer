@@ -12,16 +12,12 @@ export class GetCollaboratorActionPlansUseCase {
     private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
-  async execute(collaboratorId: string): Promise<ActionPlan[]> {
-    // collaboratorId is UUID - need to get internal ID for FK lookups
-    const collaborator = await this.collaboratorRepository.findById(collaboratorId);
+  async execute(collaboratorId: number): Promise<ActionPlan[]> {
+    const collaborator =
+      await this.collaboratorRepository.findById(collaboratorId);
     if (!collaborator) {
       throw new NotFoundException('Collaborator not found');
     }
-    if (!collaborator.internalId) {
-      throw new Error('Collaborator internal ID not available');
-    }
-    return this.actionPlanRepository.findByCollaboratorId(collaborator.internalId);
+    return this.actionPlanRepository.findByCollaboratorId(collaboratorId);
   }
 }
-

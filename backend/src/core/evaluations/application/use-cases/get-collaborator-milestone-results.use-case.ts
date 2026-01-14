@@ -12,18 +12,12 @@ export class GetCollaboratorMilestoneResultsUseCase {
     private readonly collaboratorRepository: ICollaboratorRepository,
   ) {}
 
-  async execute(collaboratorId: string): Promise<MilestoneResult[]> {
-    // collaboratorId is UUID - need to get internal ID for FK lookups
-    const collaborator = await this.collaboratorRepository.findById(collaboratorId);
+  async execute(collaboratorId: number): Promise<MilestoneResult[]> {
+    const collaborator =
+      await this.collaboratorRepository.findById(collaboratorId);
     if (!collaborator) {
       throw new NotFoundException('Collaborator not found');
     }
-    if (!collaborator.internalId) {
-      throw new Error('Collaborator internal ID not available');
-    }
-    return this.milestoneResultRepository.findByCollaboratorId(collaborator.internalId);
+    return this.milestoneResultRepository.findByCollaboratorId(collaboratorId);
   }
 }
-
-
-

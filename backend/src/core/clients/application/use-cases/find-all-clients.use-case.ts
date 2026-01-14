@@ -13,4 +13,3 @@ export class FindAllClientsUseCase {
     return this.clientRepository.findAll();
   }
 }
-

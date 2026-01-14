@@ -205,7 +205,7 @@ const ClientsList = () => {
       return [];
     }
 
-    let filtered = clients.filter(c => {
+    const filtered = clients.filter(c => {
       if (!c) return false;
       return (c.name?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     });

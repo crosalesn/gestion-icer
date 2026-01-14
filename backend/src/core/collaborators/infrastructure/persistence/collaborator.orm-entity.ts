@@ -16,9 +16,6 @@ export class CollaboratorOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'uniqueidentifier', unique: true, default: () => 'NEWID()' })
-  uuid: string;
-
   @Column()
   name: string;
 

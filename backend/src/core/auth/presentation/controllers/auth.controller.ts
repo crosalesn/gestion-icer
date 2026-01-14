@@ -9,7 +9,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Iniciar sesión de usuario' })
-  @ApiResponse({ status: 200, description: 'Inicio de sesión exitoso y token generado.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Inicio de sesión exitoso y token generado.',
+  })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas.' })
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -17,4 +20,3 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 }
-

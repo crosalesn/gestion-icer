@@ -13,7 +13,8 @@ import { UpdateTemplateCommand } from '../../application/commands/update-templat
 
 export class UpdateQuestionDto {
   @ApiProperty({
-    description: 'ID de la pregunta (opcional, si no se proporciona se crea una nueva)',
+    description:
+      'ID de la pregunta (opcional, si no se proporciona se crea una nueva)',
     required: false,
   })
   @IsString()
@@ -28,7 +29,8 @@ export class UpdateQuestionDto {
   text?: string;
 
   @ApiProperty({
-    description: 'ID de la dimensión ICER de la pregunta (ID numérico como string)',
+    description:
+      'ID de la dimensión ICER de la pregunta (ID numérico como string)',
   })
   @IsString()
   @IsOptional()
@@ -99,8 +101,7 @@ export class UpdateTemplateDto {
   @IsOptional()
   createNewVersion?: boolean;
 
-  toCommand(templateId: string): UpdateTemplateCommand {
-    // Transform questions, filtering out any that don't have all required fields
+  toCommand(templateId: number): UpdateTemplateCommand {
     const questionData = this.questions
       ?.filter(
         (q) =>

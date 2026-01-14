@@ -63,7 +63,7 @@ const collaboratorsService = {
     }
   },
 
-  getById: async (id: string) => {
+  getById: async (id: number) => {
     const response = await api.get<any>(`/collaborators/${id}`);
     return normalizeCollaborator(response.data);
   },
@@ -73,12 +73,12 @@ const collaboratorsService = {
     return normalizeCollaborator(response.data);
   },
 
-  update: async (id: string, data: UpdateCollaboratorPayload) => {
+  update: async (id: number, data: UpdateCollaboratorPayload) => {
     const response = await api.put<any>(`/collaborators/${id}`, data);
     return normalizeCollaborator(response.data);
   },
 
-  delete: async (id: string) => {
+  delete: async (id: number) => {
     await api.delete(`/collaborators/${id}`);
   }
 };

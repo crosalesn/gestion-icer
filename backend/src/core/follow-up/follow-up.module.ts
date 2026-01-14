@@ -26,4 +26,3 @@ import { FollowUpPlanTemplateOrmEntity } from './infrastructure/persistence/foll
   ],
 })
 export class FollowUpModule {}
-

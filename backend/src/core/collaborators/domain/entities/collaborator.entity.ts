@@ -3,27 +3,22 @@ import { RiskLevel } from '../value-objects/risk-level.enum';
 
 export class Collaborator {
   constructor(
-    private readonly _id: string,
-    private readonly _internalId: string | null, // Numeric DB ID (null for new entities)
+    private _id: number | null, // null for new entities, assigned by DB after save
     private _name: string,
     private _email: string,
     private _admissionDate: Date,
     private _project: string,
     private _role: string, // Job Title
     private _teamLeader: string, // Name of the TL
-    private _clientId: string, // Client ID (required)
+    private _clientId: number, // Client ID (required)
     private _status: CollaboratorStatus,
     private _riskLevel: RiskLevel,
     private readonly _createdAt: Date,
     private _updatedAt: Date,
   ) {}
 
-  get id(): string {
+  get id(): number | null {
     return this._id;
-  }
-
-  get internalId(): string | null {
-    return this._internalId;
   }
 
   get name(): string {
@@ -50,7 +45,7 @@ export class Collaborator {
     return this._teamLeader;
   }
 
-  get clientId(): string {
+  get clientId(): number {
     return this._clientId;
   }
 
@@ -70,20 +65,18 @@ export class Collaborator {
     return this._updatedAt;
   }
 
-  // Factory method
+  // Factory method for creating new entities (id will be assigned by DB)
   static create(
-    id: string,
     name: string,
     email: string,
     admissionDate: Date,
     project: string,
     role: string,
     teamLeader: string,
-    clientId: string,
+    clientId: number,
   ): Collaborator {
     return new Collaborator(
-      id,
-      null, // internalId is null for new entities (populated after save)
+      null, // id is null for new entities
       name,
       email,
       admissionDate,
@@ -100,15 +93,14 @@ export class Collaborator {
 
   // Reconstitute from persistence
   static reconstitute(
-    id: string,
-    internalId: string,
+    id: number,
     name: string,
     email: string,
     admissionDate: Date,
     project: string,
     role: string,
     teamLeader: string,
-    clientId: string,
+    clientId: number,
     status: CollaboratorStatus,
     riskLevel: RiskLevel,
     createdAt: Date,
@@ -116,7 +108,6 @@ export class Collaborator {
   ): Collaborator {
     return new Collaborator(
       id,
-      internalId,
       name,
       email,
       admissionDate,
@@ -131,7 +122,7 @@ export class Collaborator {
     );
   }
 
-  // Domain logic methods can be added here
+  // Domain logic methods
   advanceStatus(): void {
     if (this._status === CollaboratorStatus.PENDING_DAY_1) {
       this._status = CollaboratorStatus.PENDING_WEEK_1;
@@ -148,7 +139,7 @@ export class Collaborator {
     this._updatedAt = new Date();
   }
 
-  updateClientId(clientId: string): void {
+  updateClientId(clientId: number): void {
     this._clientId = clientId;
     this._updatedAt = new Date();
   }

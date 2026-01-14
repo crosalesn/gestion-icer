@@ -1,11 +1,9 @@
 import { Collaborator } from '../entities/collaborator.entity';
 
 export interface ICollaboratorRepository {
-  save(collaborator: Collaborator): Promise<void>;
-  findById(id: string): Promise<Collaborator | null>;
-  findByInternalId(internalId: string): Promise<Collaborator | null>;
+  save(collaborator: Collaborator): Promise<Collaborator>;
+  findById(id: number): Promise<Collaborator | null>;
   findByEmail(email: string): Promise<Collaborator | null>;
   findAll(): Promise<Collaborator[]>;
-  delete(id: string): Promise<void>;
+  delete(id: number): Promise<void>;
 }
-

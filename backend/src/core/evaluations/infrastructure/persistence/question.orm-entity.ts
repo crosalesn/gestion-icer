@@ -42,4 +42,7 @@ export class QuestionOrmEntity {
 
   @Column('bit')
   required: boolean;
+
+  @Column({ type: 'bit', name: 'is_active', default: true })
+  isActive: boolean;
 }

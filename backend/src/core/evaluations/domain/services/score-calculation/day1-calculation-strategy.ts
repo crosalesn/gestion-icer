@@ -14,12 +14,17 @@ export class Day1CalculationStrategy implements ICalculationStrategy {
     const collaboratorAssignment = assignments.find(
       (a) => a.role === TargetRole.COLLABORATOR,
     );
-    return collaboratorAssignment !== undefined && collaboratorAssignment.assignment.score !== null;
+    return (
+      collaboratorAssignment !== undefined &&
+      collaboratorAssignment.assignment.score !== null
+    );
   }
 
   calculate(assignments: AssignmentWithRole[]): CalculationResult {
     if (!this.canCalculate(assignments)) {
-      throw new Error('Cannot calculate Day 1 result: missing collaborator evaluation');
+      throw new Error(
+        'Cannot calculate Day 1 result: missing collaborator evaluation',
+      );
     }
 
     const collaboratorAssignment = assignments.find(
@@ -27,7 +32,7 @@ export class Day1CalculationStrategy implements ICalculationStrategy {
     )!;
 
     if (!collaboratorAssignment.assignment.score) {
-       throw new Error('Collaborator assignment score is null');
+      throw new Error('Collaborator assignment score is null');
     }
 
     const finalScore = collaboratorAssignment.assignment.score;

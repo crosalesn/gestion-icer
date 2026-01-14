@@ -17,4 +17,3 @@ export class GetAllDimensionsUseCase {
     return this.dimensionRepository.findAll();
   }
 }
-

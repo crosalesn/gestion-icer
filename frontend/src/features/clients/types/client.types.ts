@@ -1,5 +1,5 @@
 export interface Client {
-  id: string;
+  id: number;
   name: string;
   createdAt: string;
   updatedAt: string;
@@ -12,4 +12,3 @@ export interface CreateClientPayload {
 export interface UpdateClientPayload {
   name: string;
 }
-

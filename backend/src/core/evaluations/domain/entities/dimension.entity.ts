@@ -54,4 +54,3 @@ export class Dimension {
     return new Dimension(id, code, name, description, order, isActive);
   }
 }
-

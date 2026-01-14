@@ -35,7 +35,7 @@ const templateService = {
     return response.data;
   },
 
-  getById: async (id: string): Promise<EvaluationTemplate> => {
+  getById: async (id: number | string): Promise<EvaluationTemplate> => {
     const response = await api.get<EvaluationTemplate>(`/evaluations/templates/${id}`);
     return response.data;
   },
@@ -45,7 +45,7 @@ const templateService = {
     return response.data;
   },
 
-  update: async (id: string, payload: UpdateTemplatePayload): Promise<EvaluationTemplate> => {
+  update: async (id: number | string, payload: UpdateTemplatePayload): Promise<EvaluationTemplate> => {
     const response = await api.put<EvaluationTemplate>(`/evaluations/templates/${id}`, payload);
     return response.data;
   }

@@ -35,4 +35,3 @@ export class DeleteDimensionUseCase {
     this.logger.log(`Dimension ${id} deactivated successfully`);
   }
 }
-

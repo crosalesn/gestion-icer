@@ -8,4 +8,3 @@ export interface IClientRepository {
   findAll(): Promise<Client[]>;
   delete(id: string): Promise<void>;
 }
-

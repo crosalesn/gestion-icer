@@ -37,4 +37,3 @@ export class FollowUpPlanTemplateOrmEntity {
   @Column({ name: 'updated_at', type: 'datetime2' })
   updatedAt: Date;
 }
-
