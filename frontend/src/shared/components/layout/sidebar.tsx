@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { clsx } from 'clsx';
+import witiLogo from '../../../assets/logos/witi-logo.svg';
 import { 
   Settings, 
   Users, 
@@ -75,30 +76,32 @@ const Sidebar = ({ isOpen, toggle }: SidebarProps) => {
   return (
     <aside
       className={clsx(
-        "fixed inset-y-0 left-0 z-50 w-72 bg-brand-dark text-gray-300 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shadow-xl border-r border-white/5",
+        "fixed inset-y-0 left-0 z-50 w-72 bg-brand-dark text-gray-300 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shadow-xl border-r border-white/5 flex flex-col",
         !isOpen && "-translate-x-full"
       )}
     >
       {/* Header / Logo */}
-      <div className="h-20 flex items-center px-6 bg-brand-darker/50 backdrop-blur-sm border-b border-white/5">
-        <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center text-white font-bold shadow-lg shadow-brand-accent/20">
-                IC
-            </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-                Administración ICER
-            </span>
+      <div className="relative px-6 py-4 bg-brand-darker/50 backdrop-blur-sm border-b border-white/5">
+        <div className="flex flex-col items-center justify-center text-center gap-2">
+          <img
+            src={witiLogo}
+            alt="WiTI"
+            className="w-[115px] h-[115px] object-contain"
+          />
+          <span className="text-lg font-bold text-white tracking-tight leading-tight">
+            Administración ICER
+          </span>
         </div>
         <button 
             onClick={toggle} 
-            className="absolute right-4 lg:hidden p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+            className="absolute right-4 top-4 lg:hidden p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
         >
             ✕
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="p-4 space-y-2 overflow-y-auto h-[calc(100vh-5rem)] custom-scrollbar">
+      <nav className="p-4 space-y-2 overflow-y-auto flex-1 custom-scrollbar">
         <div className="px-4 mb-4 mt-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
           Menu Principal
         </div>

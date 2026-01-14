@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #2563eb;
-  --color-brand-secondary: #1d4ed8;
-  --color-brand-dark: #1e2332;
-  --color-brand-darker: #151823;
-  --color-brand-accent: #3b82f6;
-  --color-brand-accent-hover: #2563eb;
-  --color-brand-surface: #f8fafc;
+  /* Palette aligned to src/assets/witi-background.svg */
+  --color-brand-primary: #1E63C6;
+  --color-brand-secondary: #1F50A5;
+  --color-brand-dark: #00103F;
+  --color-brand-darker: #020808;
+  --color-brand-accent: #EE721C;
+  --color-brand-accent-hover: #EE721C;
+  --color-brand-surface: #F3F6FB;
   
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }

@@ -7,7 +7,7 @@ const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-[#f3f4f7]">
+    <div className="min-h-screen flex bg-brand-surface">
       <Sidebar isOpen={sidebarOpen} toggle={() => setSidebarOpen(false)} />
       
       {/* Overlay for mobile */}
