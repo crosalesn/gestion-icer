@@ -9,12 +9,25 @@ export interface LoginResponse {
   access_token: string;
 }
 
-export interface User {
-  id: string;
-  email: string;
+export interface TokenPayload {
+  sub: number;
   name: string;
+  email: string;
   role: string;
+  iat: number;
+  exp: number;
 }
+
+// Decodifica el payload del JWT (sin verificar la firma)
+const decodeToken = (token: string): TokenPayload | null => {
+  try {
+    const base64Payload = token.split('.')[1];
+    const payload = atob(base64Payload);
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+};
 
 const authService = {
   login: async (credentials: LoginPayload) => {
@@ -29,20 +42,22 @@ const authService = {
     localStorage.removeItem('token');
   },
 
-  getCurrentUser: async () => {
-    // Assuming there's an endpoint to get the current user profile
-    // If not, we might need to decode the token or use a specific endpoint
-    // Based on backend controller, we don't see a direct 'me' endpoint yet in the listed controllers,
-    // but usually it exists or we might need to rely on just the token for now.
-    // For now, I'll assume a /users/profile or similar, or just return a mock if not ready.
-    // Checking backend/src/core/users/presentation/controllers/user.controller.ts again...
-    // It only has create and createTestUser. 
-    // The AuthController only has login.
-    // I will implement a placeholder that decodes token or just assumes success for now if endpoint missing.
-    // But typically we need user info.
-    // Let's assume for this initial step we just store the token.
-    return { name: 'User' }; // Placeholder
-  }
+  decodeToken,
+
+  getUserFromToken: (): { id: number; name: string; email: string; role: string } | null => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    
+    const payload = decodeToken(token);
+    if (!payload) return null;
+    
+    return {
+      id: payload.sub,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+    };
+  },
 };
 
 export default authService;

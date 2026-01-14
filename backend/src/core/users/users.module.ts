@@ -5,6 +5,7 @@ import { CreateUserUseCase } from './application/use-cases/create-user.use-case'
 import { FindUserByEmailUseCase } from './application/use-cases/find-user-by-email.use-case';
 import { FindUserByIdUseCase } from './application/use-cases/find-user-by-id.use-case';
 import { FindAllUsersUseCase } from './application/use-cases/find-all-users.use-case';
+import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { PostgresUserRepository } from './infrastructure/persistence/user.repository';
 import { UserOrmEntity } from './infrastructure/persistence/user.orm-entity';
 
@@ -16,6 +17,7 @@ import { UserOrmEntity } from './infrastructure/persistence/user.orm-entity';
     FindUserByEmailUseCase,
     FindUserByIdUseCase,
     FindAllUsersUseCase,
+    UpdateUserUseCase,
     {
       provide: 'IUserRepository',
       useClass: PostgresUserRepository,

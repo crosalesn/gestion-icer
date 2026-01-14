@@ -21,21 +21,47 @@ const Button = ({
   disabled,
   ...props
 }: ButtonProps) => {
-  const baseStyles =
-    'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = clsx(
+    'inline-flex items-center justify-center rounded-xl font-semibold gap-2',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+    'disabled:opacity-55 disabled:cursor-not-allowed'
+  );
 
   const variants = {
-    primary: 'bg-brand-primary text-white hover:bg-brand-secondary focus:ring-brand-primary',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-500',
-    outline: 'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-brand-primary',
+    primary: clsx(
+      'bg-gradient-to-r from-brand-primary to-brand-primary-strong text-white',
+      'shadow-[var(--shadow-soft)]',
+      'hover:shadow-lg',
+      'focus-visible:ring-brand-primary'
+    ),
+    secondary: clsx(
+      'bg-white text-brand-primary border border-brand-primary/20',
+      'shadow-[var(--shadow-soft)]',
+      'hover:border-brand-primary/50 hover:shadow-lg hover:bg-brand-primary/5',
+      'focus-visible:ring-brand-primary/60'
+    ),
+    danger: clsx(
+      'bg-gradient-to-r from-red-500 to-red-600 text-white',
+      'shadow-[var(--shadow-soft)]',
+      'hover:shadow-lg',
+      'focus-visible:ring-red-500'
+    ),
+    ghost: clsx(
+      'bg-white/50 text-slate-700 border border-transparent',
+      'hover:border-slate-200 hover:bg-white hover:shadow-sm',
+      'focus-visible:ring-brand-primary/40'
+    ),
+    outline: clsx(
+      'bg-transparent border border-slate-300 text-slate-800',
+      'hover:bg-white/60 hover:border-brand-primary/50 hover:text-brand-primary hover:shadow-sm',
+      'focus-visible:ring-brand-primary'
+    ),
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-3 py-1.5 text-xs',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-6 py-3 text-base',
   };
 
   return (
@@ -52,7 +78,9 @@ const Button = ({
       disabled={isLoading || disabled}
       {...props}
     >
-      {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+      {isLoading && (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      )}
       {children}
     </button>
   );

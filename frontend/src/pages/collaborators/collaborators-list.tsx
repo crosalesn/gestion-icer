@@ -2,7 +2,9 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import collaboratorsService from '../../features/collaborators/services/collaborators-service';
+import clientsService from '../../features/clients/services/clients-service';
 import type { Collaborator } from '../../features/collaborators/types/collaborator.types';
+import type { Client } from '../../features/clients/types/client.types';
 import Button from '../../shared/components/ui/button';
 import { formatDate, getDaysFromDate, parseDate } from '../../shared/utils/date-utils';
 import { Plus, Search, AlertTriangle, CheckCircle, ChevronUp, ChevronDown, ChevronsUpDown, Eye, Trash2, Edit, Clock, ArrowRight } from 'lucide-react';
@@ -26,6 +28,11 @@ const CollaboratorsList = () => {
   // Filtros
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [riskFilter, setRiskFilter] = useState<string>('all');
+  const [clientFilter, setClientFilter] = useState<string>('all');
+  const [leaderFilter, setLeaderFilter] = useState<string>('all');
+  
+  // Lista de clientes para el filtro
+  const [clients, setClients] = useState<Client[]>([]);
   
   // Ordenamiento
   const [sortField, setSortField] = useState<SortField>('name');
@@ -45,6 +52,16 @@ const CollaboratorsList = () => {
       setCollaborators([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchClients = async () => {
+    try {
+      const data = await clientsService.getAll();
+      setClients(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      setClients([]);
     }
   };
 
@@ -70,7 +87,17 @@ const CollaboratorsList = () => {
 
   useEffect(() => {
     fetchCollaborators();
+    fetchClients();
   }, []);
+
+  // Obtener lista de líderes únicos para el filtro
+  const uniqueLeaders = useMemo(() => {
+    if (!Array.isArray(collaborators)) return [];
+    const leaders = collaborators
+      .map(c => c?.teamLeader)
+      .filter((leader): leader is string => !!leader && leader.trim() !== '');
+    return [...new Set(leaders)].sort();
+  }, [collaborators]);
 
   // Filtrado y ordenamiento
   const filteredAndSortedCollaborators = useMemo(() => {
@@ -90,8 +117,10 @@ const CollaboratorsList = () => {
       
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
       const matchesRisk = riskFilter === 'all' || c.riskLevel === riskFilter;
+      const matchesClient = clientFilter === 'all' || c.clientId === Number(clientFilter);
+      const matchesLeader = leaderFilter === 'all' || c.teamLeader === leaderFilter;
       
-      return matchesSearch && matchesStatus && matchesRisk;
+      return matchesSearch && matchesStatus && matchesRisk && matchesClient && matchesLeader;
     });
 
     // Ordenamiento
@@ -137,7 +166,7 @@ const CollaboratorsList = () => {
     });
 
     return filtered;
-  }, [collaborators, searchTerm, statusFilter, riskFilter, sortField, sortDirection]);
+  }, [collaborators, searchTerm, statusFilter, riskFilter, clientFilter, leaderFilter, sortField, sortDirection]);
 
   // Paginación
   const totalPages = Math.ceil(filteredAndSortedCollaborators.length / itemsPerPage);
@@ -231,10 +260,11 @@ const CollaboratorsList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start flex-col gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Colaboradores</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="pill bg-brand-primary/10 text-brand-primary border border-brand-primary/20 inline-block mb-1">Evaluaciones</p>
+          <h1 className="text-2xl font-bold text-slate-900">Colaboradores</h1>
+          <p className="mt-1 text-sm text-slate-500">
             Administración de nuevos ingresos y seguimiento ICER
           </p>
         </div>
@@ -270,16 +300,16 @@ const CollaboratorsList = () => {
       )}
 
       {/* Filtros y Búsqueda */}
-      <div className="bg-white shadow rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="card p-5">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div className="md:col-span-2">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-gray-400" />
+                <Search size={18} className="text-slate-400" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2.5 border border-[var(--color-border-subtle)] rounded-xl leading-5 bg-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary sm:text-sm shadow-[var(--shadow-soft)]"
                 placeholder="Buscar por nombre, email, proyecto, rol o líder..."
                 value={searchTerm}
                 onChange={(e) => {
@@ -292,7 +322,39 @@ const CollaboratorsList = () => {
           
           <div>
             <select
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary"
+              className="block w-full px-3.5 py-2.5 border border-[var(--color-border-subtle)] rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary shadow-[var(--shadow-soft)]"
+              value={clientFilter}
+              onChange={(e) => {
+                setClientFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Todos los clientes</option>
+              {clients.map(client => (
+                <option key={client.id} value={client.id}>{client.name}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <select
+              className="block w-full px-3.5 py-2.5 border border-[var(--color-border-subtle)] rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary shadow-[var(--shadow-soft)]"
+              value={leaderFilter}
+              onChange={(e) => {
+                setLeaderFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Todos los líderes</option>
+              {uniqueLeaders.map(leader => (
+                <option key={leader} value={leader}>{leader}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <select
+              className="block w-full px-3.5 py-2.5 border border-[var(--color-border-subtle)] rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary shadow-[var(--shadow-soft)]"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -309,7 +371,7 @@ const CollaboratorsList = () => {
           
           <div>
             <select
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary"
+              className="block w-full px-3.5 py-2.5 border border-[var(--color-border-subtle)] rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary shadow-[var(--shadow-soft)]"
               value={riskFilter}
               onChange={(e) => {
                 setRiskFilter(e.target.value);
@@ -326,43 +388,35 @@ const CollaboratorsList = () => {
         </div>
         
         {filteredAndSortedCollaborators.length !== collaborators.length && (
-          <div className="mt-3 text-sm text-gray-600">
+          <div className="mt-3 text-sm text-slate-600 bg-brand-surface-strong px-4 py-2 rounded-lg border border-[var(--color-border-subtle)]">
             Mostrando {filteredAndSortedCollaborators.length} de {collaborators.length} colaboradores
-          </div>
-        )}
-        {/* Debug info - remover en producción */}
-        {import.meta.env.DEV && (
-          <div className="mt-3 text-xs text-gray-400">
-            Debug: Total={collaborators.length}, Filtrados={filteredAndSortedCollaborators.length}, 
-            Paginados={paginatedCollaborators.length}, Página={currentPage}/{totalPages}
           </div>
         )}
       </div>
 
       {/* Tabla */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="table-shell">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Cargando colaboradores...</div>
+          <div className="p-8 text-center text-slate-500">Cargando colaboradores...</div>
         ) : collaborators.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p className="text-lg font-medium mb-2">No hay colaboradores registrados</p>
+          <div className="p-8 text-center text-slate-500">
+            <p className="text-lg font-semibold mb-2 text-slate-900">No hay colaboradores registrados</p>
             <p className="text-sm">Crea tu primer colaborador usando el botón "Nuevo Colaborador"</p>
           </div>
         ) : filteredAndSortedCollaborators.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p className="text-lg font-medium mb-2">No se encontraron colaboradores</p>
+          <div className="p-8 text-center text-slate-500">
+            <p className="text-lg font-semibold mb-2 text-slate-900">No se encontraron colaboradores</p>
             <p className="text-sm">Intenta ajustar los filtros de búsqueda</p>
-            <p className="text-xs mt-2 text-gray-400">Total de colaboradores: {collaborators.length}</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-[var(--color-border-subtle)]">
+                <thead>
                   <tr>
                     <th 
                       scope="col" 
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center gap-1">
@@ -372,7 +426,7 @@ const CollaboratorsList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('admissionDate')}
                     >
                       <div className="flex items-center gap-1">
@@ -382,7 +436,7 @@ const CollaboratorsList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('status')}
                     >
                       <div className="flex items-center gap-1">
@@ -392,7 +446,7 @@ const CollaboratorsList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('riskLevel')}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -400,15 +454,15 @@ const CollaboratorsList = () => {
                         {getSortIcon('riskLevel')}
                       </div>
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       Próxima Acción
                     </th>
-                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                    <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-[var(--color-border-subtle)]">
                   {(() => {
                     return paginatedCollaborators.map((collab, index) => {
                       if (!collab) return null;
@@ -417,22 +471,22 @@ const CollaboratorsList = () => {
                       const nextAction = getNextAction(collab);
                       
                       return (
-                      <tr key={collab.id || `collab-${index}`} className="hover:bg-gray-50 transition-colors">
+                      <tr key={collab.id || `collab-${index}`}>
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-gray-900">{collab?.name || 'Sin nombre'}</span>
-                          <span className="text-xs text-gray-500 mb-0.5">{collab?.role || '-'}</span>
-                          <span className="text-xs text-brand-primary font-medium bg-brand-primary/5 px-1.5 py-0.5 rounded w-fit">
+                          <span className="text-sm font-semibold text-slate-900">{collab?.name || 'Sin nombre'}</span>
+                          <span className="text-xs text-slate-500 mb-0.5">{collab?.role || '-'}</span>
+                          <span className="text-xs text-brand-primary font-medium bg-brand-primary/5 px-1.5 py-0.5 rounded-lg w-fit border border-brand-primary/10">
                             {collab?.project || '-'}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
-                          <span className="text-sm text-gray-900">
+                          <span className="text-sm text-slate-900">
                             {formatDate(collab?.admissionDate)}
                           </span>
-                          <span className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                          <span className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                             <Clock size={10} />
                             {daysActive} días
                           </span>
@@ -461,7 +515,7 @@ const CollaboratorsList = () => {
                         <div className="flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => navigate(`/colaboradores/${collab?.id}`)}
-                            className="p-1.5 text-brand-primary hover:bg-brand-primary/10 rounded transition-colors"
+                            className="p-1.5 text-brand-primary hover:bg-brand-primary/10 rounded-lg"
                             disabled={!collab?.id}
                             title="Ver detalle"
                           >
@@ -472,7 +526,7 @@ const CollaboratorsList = () => {
                               e.stopPropagation();
                               handleEdit(collab);
                             }}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
                             disabled={!collab?.id}
                             title="Editar"
                           >
@@ -483,7 +537,7 @@ const CollaboratorsList = () => {
                               e.stopPropagation();
                               handleDelete(collab);
                             }}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
                             disabled={!collab?.id}
                             title="Eliminar"
                           >

@@ -1,22 +1,30 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import authService, { type LoginPayload, type LoginResponse } from '../services/auth-service';
 
+interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
 interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  user: any | null;
+  user: AuthUser | null;
 }
 
 const token = localStorage.getItem('token');
+const user = authService.getUserFromToken();
 
 const initialState: AuthState = {
   token: token,
   isAuthenticated: !!token,
   loading: false,
   error: null,
-  user: null,
+  user: user,
 };
 
 export const loginUser = createAsyncThunk(
@@ -55,6 +63,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.loading = false;
         state.token = action.payload.access_token;
+        state.user = authService.getUserFromToken();
         state.isAuthenticated = true;
       })
       .addCase(loginUser.rejected, (state, action) => {

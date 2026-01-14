@@ -5,7 +5,8 @@ import { UserRole } from '../../features/users/types/user.types';
 import type { CreateUserPayload } from '../../features/users/types/user.types';
 import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
-import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import Select from '../../shared/components/ui/select';
+import { ArrowLeft, Save, AlertCircle, User, Mail, Lock, Shield } from 'lucide-react';
 
 const CreateUser = () => {
   const navigate = useNavigate();
@@ -49,23 +50,24 @@ const CreateUser = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button variant="ghost" onClick={() => navigate(-1)} className="p-2">
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Registrar Usuario</h1>
-            <p className="text-sm text-gray-500">Crea una nueva cuenta de acceso al sistema.</p>
+            <p className="pill bg-brand-primary/10 text-brand-primary border border-brand-primary/20 inline-block mb-1">Usuarios</p>
+            <h1 className="text-2xl font-bold text-slate-900">Registrar Usuario</h1>
+            <p className="text-sm text-slate-500">Crea una nueva cuenta de acceso al sistema.</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="card p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-4">
+            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
@@ -78,7 +80,7 @@ const CreateUser = () => {
           )}
 
           {success && (
-            <div className="bg-green-50 border-l-4 border-green-400 p-4">
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <Save className="h-5 w-5 text-green-400" aria-hidden="true" />
@@ -90,7 +92,7 @@ const CreateUser = () => {
             </div>
           )}
 
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               id="name"
               label="Nombre Completo"
@@ -100,11 +102,9 @@ const CreateUser = () => {
               placeholder="Juan Pérez"
               value={formData.name}
               onChange={handleChange}
-              className="mt-1"
+              icon={<User size={18} />}
             />
-          </div>
 
-          <div>
             <Input
               id="email"
               label="Correo Electrónico"
@@ -114,11 +114,9 @@ const CreateUser = () => {
               placeholder="ejemplo@icer.com"
               value={formData.email}
               onChange={handleChange}
-              className="mt-1"
+              icon={<Mail size={18} />}
             />
-          </div>
 
-           <div>
             <Input
               id="password"
               label="Contraseña Temporal"
@@ -128,26 +126,23 @@ const CreateUser = () => {
               placeholder="********"
               value={formData.password}
               onChange={handleChange}
-              className="mt-1"
+              icon={<Lock size={18} />}
             />
-          </div>
 
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-              Rol
-            </label>
-            <select
+            <Select
               id="role"
+              label="Rol"
               name="role"
               required
               value={formData.role}
               onChange={handleChange}
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-            >
-              <option value={UserRole.COLLABORATOR}>Colaborador</option>
-              <option value={UserRole.TEAM_LEADER}>Team Leader</option>
-              <option value={UserRole.SPECIALIST}>Especialista</option>
-            </select>
+              icon={<Shield size={18} />}
+              options={[
+                { value: UserRole.COLLABORATOR, label: 'Colaborador' },
+                { value: UserRole.TEAM_LEADER, label: 'Team Leader' },
+                { value: UserRole.SPECIALIST, label: 'Especialista' },
+              ]}
+            />
           </div>
 
           <div className="flex justify-end pt-4">

@@ -85,4 +85,21 @@ export class User {
       updatedAt,
     );
   }
+
+  // Method to update user properties
+  update(data: { name?: string; email?: string; role?: UserRole; isActive?: boolean }): void {
+    if (data.name !== undefined) {
+      this._name = data.name;
+    }
+    if (data.email !== undefined) {
+      this._email = data.email;
+    }
+    if (data.role !== undefined) {
+      this._role = data.role;
+    }
+    if (data.isActive !== undefined) {
+      this._isActive = data.isActive;
+    }
+    this._updatedAt = new Date();
+  }
 }

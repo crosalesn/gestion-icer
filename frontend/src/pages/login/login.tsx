@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/ui/button';
 import Input from '../../shared/components/ui/input';
 import loginBackground from '../../assets/witi-background.svg';
+import { Mail, Lock } from 'lucide-react';
 
 
 const formatBuildDate = (isoDate: string) => {
@@ -61,8 +62,8 @@ const Login = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div className="group">
-                <label className="block text-sm font-medium text-gray-200 mb-1 ml-1">Correo Electrónico</label>
+            <div>
+                <label className="block text-sm font-medium text-gray-200 mb-1.5 ml-1">Correo Electrónico</label>
                 <Input
                   id="email"
                   type="email"
@@ -70,11 +71,12 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="admin@icer.com"
+                  icon={<Mail size={18} className="text-gray-400" />}
                   className="bg-white/10 border-gray-500 text-white placeholder-gray-400 focus:ring-brand-accent focus:border-brand-accent"
                 />
             </div>
-            <div className="group">
-                <label className="block text-sm font-medium text-gray-200 mb-1 ml-1">Contraseña</label>
+            <div>
+                <label className="block text-sm font-medium text-gray-200 mb-1.5 ml-1">Contraseña</label>
                 <Input
                   id="password"
                   type="password"
@@ -82,6 +84,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
+                  icon={<Lock size={18} className="text-gray-400" />}
                   className="bg-white/10 border-gray-500 text-white placeholder-gray-400 focus:ring-brand-accent focus:border-brand-accent"
                 />
             </div>
@@ -97,7 +100,7 @@ const Login = () => {
             type="submit"
             fullWidth
             isLoading={loading}
-            className="bg-brand-accent hover:bg-brand-accent-hover text-white font-semibold py-3 shadow-lg transform transition hover:scale-[1.02]"
+            className="bg-brand-accent hover:bg-brand-accent-hover text-white font-semibold py-3 shadow-lg"
           >
             Ingresar
           </Button>

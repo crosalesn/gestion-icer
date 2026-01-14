@@ -20,3 +20,10 @@ export interface CreateUserPayload {
   password: string;
   role: UserRole;
 }
+
+export interface UpdateUserPayload {
+  name?: string;
+  email?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}

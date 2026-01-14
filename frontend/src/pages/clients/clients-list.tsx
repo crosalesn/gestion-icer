@@ -101,7 +101,7 @@ const ClientFormModal = ({ isOpen, onClose, onSuccess, client }: ClientFormModal
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm">
+          <div className="bg-red-50 text-red-700 p-3 rounded-xl text-sm border border-red-200">
             {error}
           </div>
         )}
@@ -114,6 +114,7 @@ const ClientFormModal = ({ isOpen, onClose, onSuccess, client }: ClientFormModal
           onChange={(e) => setName(e.target.value)}
           placeholder="Ej: Empresa ABC"
           autoFocus
+          icon={<Building2 size={18} />}
         />
       </form>
     </Modal>
@@ -147,14 +148,14 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, clientName, loading }:
       }
     >
       <div className="text-center py-4">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-          <Trash2 className="h-6 w-6 text-red-600" />
+        <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-xl bg-red-100 mb-4 border border-red-200">
+          <Trash2 className="h-7 w-7 text-red-600" />
         </div>
-        <p className="text-gray-600">
+        <p className="text-slate-600">
           ¿Estás seguro de que deseas eliminar el cliente{' '}
-          <span className="font-semibold text-gray-900">"{clientName}"</span>?
+          <span className="font-semibold text-slate-900">"{clientName}"</span>?
         </p>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-slate-500 mt-2">
           Esta acción no se puede deshacer.
         </p>
       </div>
@@ -310,10 +311,11 @@ const ClientsList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start flex-col gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="pill bg-brand-primary/10 text-brand-primary border border-brand-primary/20 inline-block mb-1">Administración</p>
+          <h1 className="text-2xl font-bold text-slate-900">Clientes</h1>
+          <p className="mt-1 text-sm text-slate-500">
             Administración de clientes (organizaciones/empresas)
           </p>
         </div>
@@ -324,14 +326,14 @@ const ClientsList = () => {
       </div>
 
       {/* Búsqueda */}
-      <div className="bg-white shadow rounded-lg p-4">
-        <div className="relative max-w-md">
+      <div className="card p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="relative w-full md:max-w-lg">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search size={18} className="text-gray-400" />
+            <Search size={18} className="text-slate-400" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+            className="block w-full pl-10 pr-3 py-3 border border-[var(--color-border-subtle)] rounded-xl leading-5 bg-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary sm:text-sm shadow-[var(--shadow-soft)] transition-all"
             placeholder="Buscar por nombre..."
             value={searchTerm}
             onChange={(e) => {
@@ -342,36 +344,36 @@ const ClientsList = () => {
         </div>
         
         {filteredAndSortedClients.length !== clients.length && (
-          <div className="mt-3 text-sm text-gray-600">
+          <div className="text-sm text-slate-600 bg-brand-surface-strong px-4 py-2 rounded-lg border border-[var(--color-border-subtle)]">
             Mostrando {filteredAndSortedClients.length} de {clients.length} clientes
           </div>
         )}
       </div>
 
       {/* Tabla */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="table-shell">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Cargando clientes...</div>
+          <div className="p-8 text-center text-slate-500">Cargando clientes...</div>
         ) : clients.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <Building2 size={48} className="mx-auto mb-4 text-gray-300" />
-            <p className="text-lg font-medium mb-2">No hay clientes registrados</p>
+          <div className="p-8 text-center text-slate-500">
+            <Building2 size={48} className="mx-auto mb-4 text-slate-300" />
+            <p className="text-lg font-semibold mb-2 text-slate-900">No hay clientes registrados</p>
             <p className="text-sm">Crea tu primer cliente usando el botón "Nuevo Cliente"</p>
           </div>
         ) : filteredAndSortedClients.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p className="text-lg font-medium mb-2">No se encontraron clientes</p>
+          <div className="p-8 text-center text-slate-500">
+            <p className="text-lg font-semibold mb-2 text-slate-900">No se encontraron clientes</p>
             <p className="text-sm">Intenta ajustar el término de búsqueda</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-[var(--color-border-subtle)]">
+                <thead>
                   <tr>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-brand-primary/5 transition-colors"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center space-x-1">
@@ -381,7 +383,7 @@ const ClientsList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-brand-primary/5 transition-colors"
                       onClick={() => handleSort('createdAt')}
                     >
                       <div className="flex items-center space-x-1">
@@ -394,33 +396,33 @@ const ClientsList = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-[var(--color-border-subtle)]">
                   {paginatedClients.map((client) => (
-                    <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={client.id} className="transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold">
+                          <div className="h-10 w-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold border border-brand-primary/20">
                             {(client.name || '?').charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{client.name}</div>
+                            <div className="text-sm font-semibold text-slate-900">{client.name}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                         {formatDate(client.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <button 
-                            className="inline-flex items-center text-brand-primary hover:text-brand-secondary transition-colors p-1 rounded hover:bg-brand-primary/5"
+                            className="inline-flex items-center text-brand-primary hover:text-brand-primary-strong transition-colors p-1 rounded-full hover:bg-brand-primary/10"
                             onClick={() => handleEdit(client)}
                             title="Editar"
                           >
                             <Pencil size={16} />
                           </button>
                           <button 
-                            className="inline-flex items-center text-red-500 hover:text-red-700 transition-colors p-1 rounded hover:bg-red-50"
+                            className="inline-flex items-center text-red-500 hover:text-red-700 transition-colors p-1 rounded-full hover:bg-red-50"
                             onClick={() => handleDeleteClick(client)}
                             title="Eliminar"
                           >
@@ -436,7 +438,7 @@ const ClientsList = () => {
 
             {/* Paginación */}
             {totalPages > 1 && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="bg-white/80 px-4 py-3 flex items-center justify-between border-t border-[var(--color-border-subtle)] sm:px-6">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}

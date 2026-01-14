@@ -31,6 +31,9 @@ export interface CollaboratorHistory {
 
 export interface DashboardStats {
   totalCollaborators: number;
+  activeEvaluations: number;
+  activeActionPlans: number;
+  averageScore: number | null;
   riskDistribution: {
     high: number;
     medium: number;

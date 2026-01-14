@@ -1,15 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  /* Palette aligned to src/assets/witi-background.svg */
+  /* WiTI-forward palette */
   --color-brand-primary: #1E63C6;
-  --color-brand-secondary: #1F50A5;
-  --color-brand-dark: #00103F;
-  --color-brand-darker: #020808;
+  --color-brand-primary-strong: #174fa4;
+  --color-brand-secondary: #0D2B5E;
+  --color-brand-dark: #031633;
+  --color-brand-darker: #020b1d;
   --color-brand-accent: #EE721C;
-  --color-brand-accent-hover: #EE721C;
-  --color-brand-surface: #F3F6FB;
-  
+  --color-brand-accent-hover: #f07d30;
+  --color-brand-surface: #F4F7FB;
+  --color-brand-surface-strong: #EAF1FF;
+  --color-brand-muted: #7E94B8;
+  --color-border-subtle: #DDE4F0;
+
+  --shadow-soft: 0 10px 40px rgba(3, 22, 51, 0.08);
+  --shadow-card: 0 18px 60px rgba(3, 22, 51, 0.12);
+  --shadow-glow: 0 0 20px rgba(30, 99, 198, 0.15);
+  --blur-overlay: blur(12px);
+  --blur-heavy: blur(20px);
+
+  --gradient-hero: radial-gradient(120% 120% at 20% 20%, rgba(30, 99, 198, 0.14), transparent 45%),
+    radial-gradient(90% 90% at 80% 0%, rgba(238, 114, 28, 0.12), transparent 55%),
+    linear-gradient(135deg, #f6f9ff 0%, #eef3ff 50%, #f8fbff 100%);
+
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -17,8 +31,100 @@
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #0f172a;
 }
 
 body {
-  @apply bg-gray-50 text-slate-900;
+  min-height: 100vh;
+  background: var(--color-brand-surface);
+}
+
+/* Utility layers */
+@layer base {
+  ::selection {
+    background: rgba(30, 99, 198, 0.18);
+    color: #0d1b3d;
+  }
+
+  body {
+    @apply text-slate-900;
+  }
+
+  .page-surface {
+    background: var(--gradient-hero);
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-[var(--color-border-subtle)] shadow-[var(--shadow-soft)];
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-card);
+    border-color: rgba(30, 99, 198, 0.2);
+  }
+
+  .card-static {
+    @apply bg-white rounded-2xl border border-[var(--color-border-subtle)] shadow-[var(--shadow-soft)];
+  }
+
+  .glass-panel {
+    backdrop-filter: var(--blur-overlay);
+    background: rgba(255, 255, 255, 0.75);
+    @apply border border-white/50 shadow-[var(--shadow-soft)];
+    transition: backdrop-filter 0.2s ease, background 0.2s ease;
+  }
+
+  .glass-panel:hover {
+    backdrop-filter: var(--blur-heavy);
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .pill {
+    @apply rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .soft-divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent;
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-2xl border border-[var(--color-border-subtle)] bg-white shadow-[var(--shadow-soft)];
+    transition: box-shadow 0.2s ease;
+  }
+
+  .table-shell:hover {
+    box-shadow: var(--shadow-card);
+  }
+
+  .table-shell table thead {
+    background: linear-gradient(135deg, var(--color-brand-surface-strong) 0%, rgba(234, 241, 255, 0.7) 100%);
+  }
+
+  .table-shell table thead th {
+    transition: background-color 0.15s ease;
+  }
+
+  .table-shell table thead th:hover {
+    background-color: rgba(30, 99, 198, 0.08);
+  }
+
+  .table-shell table tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  .table-shell table tbody tr:nth-child(even) {
+    @apply bg-slate-50/40;
+  }
+
+  .table-shell table tbody tr:hover {
+    @apply bg-brand-primary/5;
+    box-shadow: inset 3px 0 0 var(--color-brand-primary);
+  }
+
+  .floating-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-[var(--color-brand-muted)];
+  }
 }

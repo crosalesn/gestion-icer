@@ -1,5 +1,5 @@
 import api from '../../../shared/services/api-client';
-import type { User, CreateUserPayload } from '../types/user.types';
+import type { User, CreateUserPayload, UpdateUserPayload } from '../types/user.types';
 
 // Función helper para normalizar los datos del backend
 const normalizeUser = (data: any): User => {
@@ -16,6 +16,11 @@ const normalizeUser = (data: any): User => {
 };
 
 const usersService = {
+  getById: async (id: string) => {
+    const response = await api.get<any>(`/users/${id}`);
+    return normalizeUser(response.data);
+  },
+
   getAll: async () => {
     try {
       const response = await api.get<any[]>('/users');
@@ -46,6 +51,11 @@ const usersService = {
 
   create: async (data: CreateUserPayload) => {
     const response = await api.post<any>('/users', data);
+    return normalizeUser(response.data);
+  },
+
+  update: async (id: number | string, data: UpdateUserPayload) => {
+    const response = await api.put<any>(`/users/${id}`, data);
     return normalizeUser(response.data);
   },
 

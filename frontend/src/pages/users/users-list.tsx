@@ -6,7 +6,8 @@ import { formatDate } from '../../shared/utils/date-utils';
 import type { User } from '../../features/users/types/user.types';
 import { UserRole } from '../../features/users/types/user.types';
 import Button from '../../shared/components/ui/button';
-import { Plus, Search, ChevronUp, ChevronDown, ChevronsUpDown, Eye, UserCheck, UserX } from 'lucide-react';
+import EditUserModal from './components/edit-user-modal';
+import { Plus, Search, ChevronUp, ChevronDown, ChevronsUpDown, Pencil, UserCheck, UserX } from 'lucide-react';
 import { clsx } from 'clsx';
 
 type SortField = 'name' | 'email' | 'role' | 'isActive' | 'createdAt';
@@ -17,6 +18,10 @@ const UsersList = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Modal de edición
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
   // Filtros
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -174,12 +179,22 @@ const UsersList = () => {
     );
   };
 
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchUsers();
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start flex-col gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuarios</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="pill bg-brand-primary/10 text-brand-primary border border-brand-primary/20 inline-block mb-1">Administración</p>
+          <h1 className="text-2xl font-bold text-slate-900">Usuarios</h1>
+          <p className="mt-1 text-sm text-slate-500">
             Administración de cuentas de acceso (Admin, Team Leader, Specialists)
           </p>
         </div>
@@ -190,16 +205,16 @@ const UsersList = () => {
       </div>
 
       {/* Filtros y Búsqueda */}
-      <div className="bg-white shadow rounded-lg p-4">
+      <div className="card p-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-gray-400" />
+                <Search size={18} className="text-slate-400" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2.5 border border-[var(--color-border-subtle)] rounded-xl leading-5 bg-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary sm:text-sm shadow-[var(--shadow-soft)]"
                 placeholder="Buscar por nombre o email..."
                 value={searchTerm}
                 onChange={(e) => {
@@ -212,7 +227,7 @@ const UsersList = () => {
           
           <div>
             <select
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary"
+              className="block w-full px-3.5 py-2.5 border border-[var(--color-border-subtle)] rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary shadow-[var(--shadow-soft)]"
               value={roleFilter}
               onChange={(e) => {
                 setRoleFilter(e.target.value);
@@ -228,7 +243,7 @@ const UsersList = () => {
           
           <div>
             <select
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary"
+              className="block w-full px-3.5 py-2.5 border border-[var(--color-border-subtle)] rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary shadow-[var(--shadow-soft)]"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -243,43 +258,35 @@ const UsersList = () => {
         </div>
         
         {filteredAndSortedUsers.length !== users.length && (
-          <div className="mt-3 text-sm text-gray-600">
+          <div className="mt-3 text-sm text-slate-600 bg-brand-surface-strong px-4 py-2 rounded-lg border border-[var(--color-border-subtle)]">
             Mostrando {filteredAndSortedUsers.length} de {users.length} usuarios
-          </div>
-        )}
-        {/* Debug info - remover en producción */}
-        {import.meta.env.DEV && (
-          <div className="mt-3 text-xs text-gray-400">
-            Debug: Total={users.length}, Filtrados={filteredAndSortedUsers.length}, 
-            Paginados={paginatedUsers.length}, Página={currentPage}/{totalPages}
           </div>
         )}
       </div>
 
       {/* Tabla */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="table-shell">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Cargando usuarios...</div>
+          <div className="p-8 text-center text-slate-500">Cargando usuarios...</div>
         ) : users.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p className="text-lg font-medium mb-2">No hay usuarios registrados</p>
+          <div className="p-8 text-center text-slate-500">
+            <p className="text-lg font-semibold mb-2 text-slate-900">No hay usuarios registrados</p>
             <p className="text-sm">Crea tu primer usuario usando el botón "Nuevo Usuario"</p>
           </div>
         ) : filteredAndSortedUsers.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p className="text-lg font-medium mb-2">No se encontraron usuarios</p>
+          <div className="p-8 text-center text-slate-500">
+            <p className="text-lg font-semibold mb-2 text-slate-900">No se encontraron usuarios</p>
             <p className="text-sm">Intenta ajustar los filtros de búsqueda</p>
-            <p className="text-xs mt-2 text-gray-400">Total de usuarios: {users.length}</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-[var(--color-border-subtle)]">
+                <thead>
                   <tr>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center space-x-1">
@@ -289,7 +296,7 @@ const UsersList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('email')}
                     >
                       <div className="flex items-center space-x-1">
@@ -299,7 +306,7 @@ const UsersList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('role')}
                     >
                       <div className="flex items-center space-x-1">
@@ -309,7 +316,7 @@ const UsersList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('isActive')}
                     >
                       <div className="flex items-center space-x-1">
@@ -319,7 +326,7 @@ const UsersList = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('createdAt')}
                     >
                       <div className="flex items-center space-x-1">
@@ -332,7 +339,7 @@ const UsersList = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-[var(--color-border-subtle)]">
                   {(() => {
                     console.log('Rendering paginatedUsers:', paginatedUsers);
                     console.log('Length:', paginatedUsers.length);
@@ -343,19 +350,19 @@ const UsersList = () => {
                         return null;
                       }
                       return (
-                      <tr key={user.id || `user-${index}`} className="hover:bg-gray-50 transition-colors">
+                      <tr key={user.id || `user-${index}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold">
+                            <div className="h-10 w-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold border border-brand-primary/20">
                               {(user?.name || '?').charAt(0).toUpperCase()}
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{user?.name || 'Sin nombre'}</div>
+                              <div className="text-sm font-semibold text-slate-900">{user?.name || 'Sin nombre'}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{user?.email || '-'}</div>
+                          <div className="text-sm text-slate-600">{user?.email || '-'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getRoleBadge(user?.role || 'COLLABORATOR')}
@@ -363,16 +370,17 @@ const UsersList = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getStatusBadge(user?.isActive !== undefined ? user.isActive : true)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                           {formatDate(user?.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button 
-                            className="inline-flex items-center text-brand-primary hover:text-brand-secondary transition-colors"
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
                             disabled={!user?.id}
+                            onClick={() => user && handleEditUser(user)}
+                            title="Editar"
                           >
-                            <Eye size={16} className="mr-1" />
-                            Ver
+                            <Pencil size={16} />
                           </button>
                         </td>
                       </tr>
@@ -465,6 +473,19 @@ const UsersList = () => {
           </>
         )}
       </div>
+
+      {/* Modal de Edición */}
+      {selectedUser && (
+        <EditUserModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedUser(null);
+          }}
+          onSuccess={handleEditSuccess}
+          user={selectedUser}
+        />
+      )}
     </div>
   );
 };

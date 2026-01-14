@@ -10,7 +10,9 @@ import type { Collaborator, UpdateCollaboratorPayload } from '../../../features/
 import type { Client } from '../../../features/clients/types/client.types';
 import Button from '../../../shared/components/ui/button';
 import Input from '../../../shared/components/ui/input';
+import Select from '../../../shared/components/ui/select';
 import Modal from '../../../shared/components/ui/modal/modal';
+import { User, Mail, Briefcase, FolderKanban, Users, Building2, Calendar } from 'lucide-react';
 
 // Registrar locale español
 registerLocale('es', es);
@@ -144,34 +146,25 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
     >
       <form id="edit-collaborator-form" onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm">
+          <div className="bg-red-50 text-red-700 p-3 rounded-xl text-sm border border-red-200">
             {error}
           </div>
         )}
 
-        <div>
-          <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">
-            Cliente <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="clientId"
-            name="clientId"
-            required
-            value={formData.clientId}
-            onChange={handleChange}
-            disabled={loadingClients}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">
-              {loadingClients ? 'Cargando clientes...' : 'Seleccione un cliente'}
-            </option>
-            {clients.map(client => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          id="clientId"
+          name="clientId"
+          label="Cliente"
+          required
+          value={String(formData.clientId)}
+          onChange={handleChange}
+          disabled={loadingClients}
+          icon={<Building2 size={18} />}
+          options={[
+            { value: '', label: loadingClients ? 'Cargando clientes...' : 'Seleccione un cliente' },
+            ...clients.map(client => ({ value: String(client.id), label: client.name }))
+          ]}
+        />
         
         <Input
           label="Nombre Completo"
@@ -180,6 +173,7 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
           value={formData.name}
           onChange={handleChange}
           placeholder="Ej: Juan Pérez"
+          icon={<User size={18} />}
         />
 
         <Input
@@ -190,6 +184,7 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
           value={formData.email}
           onChange={handleChange}
           placeholder="juan.perez@icer.com"
+          icon={<Mail size={18} />}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -200,6 +195,7 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
             value={formData.role}
             onChange={handleChange}
             placeholder="Ej: Desarrollador Frontend"
+            icon={<Briefcase size={18} />}
           />
           <Input
             label="Proyecto"
@@ -208,24 +204,30 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
             value={formData.project}
             onChange={handleChange}
             placeholder="Ej: Banco X"
+            icon={<FolderKanban size={18} />}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="floating-label mb-1.5">
             Fecha de Ingreso <span className="text-red-500">*</span>
           </label>
-          <DatePicker
-            selected={admissionDate}
-            onChange={(date: Date | null) => setAdmissionDate(date)}
-            dateFormat="dd/MM/yyyy"
-            locale="es"
-            placeholderText="dd/mm/aaaa"
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            showYearDropdown
-            showMonthDropdown
-            dropdownMode="select"
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar size={18} className="text-slate-400" />
+            </div>
+            <DatePicker
+              selected={admissionDate}
+              onChange={(date: Date | null) => setAdmissionDate(date)}
+              dateFormat="dd/MM/yyyy"
+              locale="es"
+              placeholderText="dd/mm/aaaa"
+              className="block w-full pl-10 pr-3 py-3 border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-soft)] focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary sm:text-sm"
+              showYearDropdown
+              showMonthDropdown
+              dropdownMode="select"
+            />
+          </div>
         </div>
 
         <Input
@@ -235,6 +237,7 @@ const EditCollaboratorModal = ({ isOpen, onClose, onSuccess, collaborator }: Edi
           value={formData.teamLeader}
           onChange={handleChange}
           placeholder="Ej: María González"
+          icon={<Users size={18} />}
         />
 
       </form>

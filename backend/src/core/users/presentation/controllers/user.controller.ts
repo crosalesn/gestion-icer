@@ -1,8 +1,11 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Put, Body, Get, Param, UseGuards, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { FindAllUsersUseCase } from '../../application/use-cases/find-all-users.use-case';
+import { FindUserByIdUseCase } from '../../application/use-cases/find-user-by-id.use-case';
+import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserCommand } from '../../application/commands/create-user.command';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
@@ -13,6 +16,8 @@ export class UserController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly findAllUsersUseCase: FindAllUsersUseCase,
+    private readonly findUserByIdUseCase: FindUserByIdUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
 
   @Get()
@@ -25,6 +30,35 @@ export class UserController {
       const { passwordHash, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async findById(@Param('id') id: string) {
+    const user = await this.findUserByIdUseCase.execute(Number(id));
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const user = await this.updateUserUseCase.execute(Number(id), updateUserDto);
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   @Post()
